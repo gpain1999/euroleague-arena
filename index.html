@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basket Arena - Duel Central</title>
+
+  <!-- Bibliothèques React et Tailwind via CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Confettis -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Animations */
+    @keyframes roll {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .animate-roll { animation: roll 1s linear infinite; }
+
+    @keyframes popStat {
+      0% { transform: scale(0.5) translateY(20px); opacity: 0; }
+      50% { transform: scale(1.1) translateY(-5px); opacity: 1; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .animate-pop-stat { animation: popStat 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+    .drop-zone {
+      border: 2px dashed #334155;
+      border-radius: 9999px;
+      width: 0.75rem;
+      height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .drop-zone:hover {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+    }
+    
+    .team-zone-transition {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glow-gold { box-shadow: 0 0 40px -10px rgba(234, 179, 8, 0.2); }
+    .glow-silver { box-shadow: 0 0 40px -10px rgba(148, 163, 184, 0.2); }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // --- ICONES SVG ---
+    const Icons = {
+      Trophy: () => (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+        </svg>
+      ),
+      Basketball: ({ className }) => (
+        <svg className={className} width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M3.5 12h17"/><path d="M12 3.5v17"/><path d="M5 5a12 12 0 0 1 14 14"/><path d="M19 5a12 12 0 0 0-14 14"/>
+        </svg>
+      ),
+      History: () => (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="m12 7 0 5 3 3"/>
+        </svg>
+      ),
+      UserPlus: () => (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>
+        </svg>
+      ),
+      Plus: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      )
+    };
+
+    const GAME_STATES = { LOADING: 'LOADING', PREGAME: 'PREGAME', PLAYING: 'PLAYING', GAMEOVER: 'GAMEOVER' };
+    const PHASES = {
+      IDLE: 'IDLE', ROLLING: 'ROLLING', CHOOSING_TARGET: 'CHOOSING_TARGET',
+      DUEL: 'DUEL', REPLACING_DEF: 'REPLACING_DEF', PLACING_REPLACEMENT: 'PLACING_REPLACEMENT',
+      ATK_SUB_DECISION: 'ATK_SUB_DECISION', REMOVING_ATK: 'REMOVING_ATK'
+    };
+    const POSTES = ['S', 'M', 'L'];
+
+    // ✅ chemin du CSV auto (hébergement statique)
+    const AUTO_CSV_URL = 'data/players.csv';
+
+    const { useState, useEffect, useCallback } = React;
+
+    // ✅ parse CSV ; séparateur ";" + conversion num + dédoublonnage PLAYER_ID
+    const parsePlayersCsv = (csvText) => {
+      const lines = csvText.trim().split(/\r?\n/);
+      if (!lines.length) return [];
+      const headers = lines[0].split(';').map(h => h.trim());
+      const seenPlayerIds = new Set();
+
+      const players = lines.slice(1).map(line => {
+        const values = line.split(';');
+        const obj = {};
+        headers.forEach((h, i) => {
+          let val = values[i] ? values[i].trim() : "";
+          if (val && !isNaN(val.replace(',', '.'))) val = parseFloat(val.replace(',', '.'));
+          obj[h] = val;
+        });
+        return obj;
+      }).filter(p => {
+        if (!p.NAME || !p.PLAYER_ID) return false;
+        const pid = String(p.PLAYER_ID);
+        if (seenPlayerIds.has(pid)) return false;
+        seenPlayerIds.add(pid);
+        return true;
+      });
+
+      return players;
+    };
+
+    // --- COMPOSANTS UI ---
+    const PlayerCard = ({ player, onClick, selected, disabled, isTarget, isAttacker, isJumping, canBeTargeted, size = "md" }) => {
+      if (!player) return null;
+      
+      const cardBaseWidth = "w-[18%]";
+      const maxWidth = size === "sm" ? "max-w-[140px]" : "max-w-[180px]";
+
+      return (
+        <div
+          onClick={!disabled || canBeTargeted ? onClick : undefined}
+          style={{ aspectRatio: '800/1117' }}
+          className={`relative rounded-lg md:rounded-xl overflow-hidden shadow-2xl transition-all duration-300 cursor-pointer flex-shrink-0
+            ${cardBaseWidth} ${maxWidth} bg-slate-800 card-shadow
+            ${selected ? 'ring-2 md:ring-4 ring-blue-500 z-20' : ''}
+            ${isTarget || isAttacker ? 'ring-2 md:ring-4 ring-orange-500 z-30 scale-105' : ''}
+            ${isJumping ? 'animate-bounce' : ''}
+            ${canBeTargeted ? 'ring-2 md:ring-4 ring-yellow-400' : ''}`}
+        >
+          <img
+            src={`cartes2/${String(player.TEAM_y || player.TEAM_x).trim()}_card_${player.PLAYER_ID}.png`}
+            alt={player.NAME}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${player.NAME ? player.NAME.split(',')[0] : 'N/A'}`;
+            }}
+          />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/95 to-transparent p-1 md:p-1.5 pt-3 md:pt-4 text-[7px] md:text-[9px] lg:text-[11px]">
+            <p className="font-black truncate uppercase text-white leading-none mb-1">{player.NAME ? player.NAME.split(',')[0] : '???'}</p>
+            <div className="flex justify-between font-mono">
+              <span className="font-bold text-orange-400">O:{player.OFF}</span>
+              <span className="font-bold text-blue-400">D:{player.DEF}</span>
+            </div>
+            <div className="absolute top-1 right-1 bg-yellow-500 text-black px-1 rounded-md font-black text-[6px] md:text-[8px] lg:text-[10px] border border-yellow-600">
+              {player.Poste}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // --- APPLICATION PRINCIPALE ---
+    function App() {
+      const [gameState, setGameState] = useState(GAME_STATES.LOADING);
+      const [phase, setPhase] = useState(PHASES.IDLE);
+      const [logs, setLogs] = useState(["Prêt pour le match !"]);
+      const [scores, setScores] = useState([0, 0, 0]);
+      const [attackerId, setAttackerId] = useState(0);
+      const [defenderId, setDefenderId] = useState(1);
+      const [pausedId, setPausedId] = useState(2);
+
+      const [hands, setHands] = useState([[], [], []]);
+      const [lineups, setLineups] = useState([[], [], []]);
+      const [decks, setDecks] = useState({ S: [], M: [], L: [] });
+
+      const [selectedInHand, setSelectedInHand] = useState(null);
+      const [lastRoll, setLastRoll] = useState(null);
+      const [targetSlot, setTargetSlot] = useState(null);
+      const [shotResult, setShotResult] = useState(null);
+      const [pendingDraw, setPendingDraw] = useState(null);
+
+      const addLog = (msg) => setLogs(prev => [msg, ...prev].slice(0, 30));
+
+      useEffect(() => {
+        const winner = scores.findIndex(s => s >= 10);
+        if (winner === -1) return;
+        if (typeof window.confetti !== "function") return;
+        const palette = { 0: ['#3b82f6'], 1: ['#ef4444'], 2: ['#a855f7'] };
+        const colors = palette[winner] || ['#ffffff'];
+        window.confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors });
+      }, [scores]);
+
+      // ✅ AUTO-LOAD du CSV au lancement (hébergement statique)
+      useEffect(() => {
+        const loadAutoCsv = async () => {
+          try {
+            addLog(`📥 Chargement auto : ${AUTO_CSV_URL}`);
+            const res = await fetch(AUTO_CSV_URL, { cache: "no-store" });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const text = await res.text();
+            const players = parsePlayersCsv(text);
+            if (!players.length) throw new Error("CSV vide/invalide");
+            initGame(players);
+          } catch (e) {
+            console.warn("Auto CSV load failed:", e);
+            addLog("⚠ CSV auto introuvable. Importez un CSV manuellement.");
+            // On reste en LOADING => écran upload
+            setGameState(GAME_STATES.LOADING);
+          }
+        };
+        loadAutoCsv();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+
+      // ✅ Fallback manuel conservé
+      const handleManualUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const players = parsePlayersCsv(ev.target.result || "");
+          if (!players.length) return addLog("⚠ CSV invalide ou vide.");
+          initGame(players);
+        };
+        reader.readAsText(file);
+      };
+
+      const initGame = (players) => {
+        const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+        const s = shuffle(players.filter(p => p.Poste?.trim().toUpperCase() === 'S'));
+        const m = shuffle(players.filter(p => p.Poste?.trim().toUpperCase() === 'M'));
+        const l = shuffle(players.filter(p => p.Poste?.trim().toUpperCase() === 'L'));
+        
+        const newHands = [
+          [...s.splice(0, 3), ...m.splice(0, 3), ...l.splice(0, 3)],
+          [...s.splice(0, 3), ...m.splice(0, 3), ...l.splice(0, 3)],
+          [...s.splice(0, 3), ...m.splice(0, 3), ...l.splice(0, 3)]
+        ];
+        
+        setHands(newHands);
+        setDecks({ S: s, M: m, L: l });
+        setGameState(GAME_STATES.PREGAME);
+        addLog("✅ Joueurs chargés ! Placez votre 5 majeur.");
+      };
+
+      const handleLineupClick = (idx) => {
+        if (gameState === GAME_STATES.PREGAME || phase === PHASES.REMOVING_ATK) {
+          const player = lineups[0][idx];
+          const newLineup = [...lineups[0]]; newLineup.splice(idx, 1);
+          const newHands = [...hands]; newHands[0] = [...newHands[0], player];
+          const newLineups = [...lineups]; newLineups[0] = newLineup;
+          setLineups(newLineups);
+          setHands(newHands);
+          if (phase === PHASES.REMOVING_ATK) {
+            setPhase(PHASES.PLACING_REPLACEMENT);
+            addLog("Joueur sorti. Choisissez un remplaçant.");
+          }
+        }
+      };
+
+      const handleInsertion = (idx) => {
+        if (selectedInHand === null) return;
+        const card = hands[0][selectedInHand];
+        const current = lineups[0];
+        
+        if (current.filter(p => p.Poste === card.Poste).length >= 2) {
+          return addLog(`⚠ Impossible : Maximum 2 ${card.Poste} sur le terrain.`);
+        }
+
+        const newLineup = [...current]; 
+        newLineup.splice(idx, 0, card);
+
+        const orderMap = { 'S': 1, 'M': 2, 'L': 3 };
+        for (let i = 0; i < newLineup.length - 1; i++) {
+          if (orderMap[newLineup[i].Poste] > orderMap[newLineup[i+1].Poste]) return addLog("⚠ Ordre S -> M -> L obligatoire !");
+        }
+
+        if (phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF) {
+            const hasAll = POSTES.every(pos => newLineup.some(p => p.Poste === pos));
+            if (!hasAll && newLineup.length === 5) {
+                return addLog("⚠ Votre équipe doit contenir au moins un S, un M et un L.");
+            }
+        }
+
+        const newLineups = [...lineups]; newLineups[0] = newLineup;
+        setLineups(newLineups);
+        const newHands = [...hands]; newHands[0] = newHands[0].filter((_, i) => i !== selectedInHand);
+        
+        if (pendingDraw && pendingDraw.playerId === 0) {
+          const deck = decks[pendingDraw.poste];
+          if (deck.length > 0) {
+            newHands[0].push(deck[0]);
+            setDecks(prev => ({ ...prev, [pendingDraw.poste]: prev[pendingDraw.poste].slice(1) }));
+          }
+          setPendingDraw(null);
+        }
+        setHands(newHands);
+        setSelectedInHand(null);
+
+        if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) {
+          setPhase(PHASES.ATK_SUB_DECISION);
+          addLog("Remplacement effectué.");
+        }
+      };
+
+      const validatePregame = () => {
+        if (lineups[0].length !== 5) return addLog("⚠ Il faut 5 joueurs !");
+        const hasAll = POSTES.every(pos => lineups[0].some(p => p.Poste === pos));
+        if (!hasAll) return addLog("⚠ Min 1 de chaque poste (S, M, L).");
+
+        const newLineups = [...lineups];
+        const newHands = [...hands];
+        [1, 2].forEach(idx => {
+          const h = [...newHands[idx]].sort((a,b) => (b.OFF + b.DEF) - (a.OFF + a.DEF));
+          const aiL = [];
+          POSTES.forEach(p => { const b = h.find(c => c.Poste === p); if(b) { aiL.push(b); h.splice(h.indexOf(b), 1); } });
+          while(aiL.length < 5) { 
+            const n = h.find(c => aiL.filter(x => x.Poste === c.Poste).length < 2); 
+            if(n) { aiL.push(n); h.splice(h.indexOf(n), 1); } 
+            else break;
+          }
+          const oMap = { 'S': 1, 'M': 2, 'L': 3 };
+          aiL.sort((a,b) => oMap[a.Poste] - oMap[b.Poste]);
+          newLineups[idx] = aiL; newHands[idx] = h;
+        });
+        setLineups(newLineups); setHands(newHands); setGameState(GAME_STATES.PLAYING);
+        setAttackerId(0); setDefenderId(1); setPausedId(2);
+        addLog("🏀 Match commencé ! Cible : IA 1.");
+      };
+
+      const executeDuel = useCallback((slot) => {
+        setTargetSlot(slot);
+        setPhase(PHASES.DUEL);
+        
+        const atkP = lineups[attackerId][slot];
+        const defP = lineups[defenderId][slot];
+        const prob = Math.min(Math.max(0.5 + (atkP.OFF - defP.DEF) / 16, 0.05), 0.95);
+        const win = Math.random() < prob;
+
+        setTimeout(() => {
+          setShotResult({ success: win, side: attackerId });
+          setTimeout(() => {
+            setShotResult(null);
+            if (win) {
+              addLog(`🏀 PANIER ! ${atkP.NAME.split(',')[0]} marque.`);
+              const newScores = [...scores]; newScores[attackerId]++; setScores(newScores);
+              if (newScores[attackerId] >= 10) return setGameState(GAME_STATES.GAMEOVER);
+
+              const lost = lineups[defenderId][slot];
+              const nLineups = [...lineups]; nLineups[defenderId].splice(slot, 1); setLineups(nLineups);
+              setDecks(prev => ({ ...prev, [lost.Poste]: [...prev[lost.Poste], lost] }));
+              setPendingDraw({ playerId: defenderId, poste: lost.Poste });
+              
+              setTargetSlot(null);
+              setPhase(PHASES.REPLACING_DEF);
+              
+              const oldDef = defenderId;
+              const oldPause = pausedId;
+              setDefenderId(oldPause);
+              setPausedId(oldDef);
+              addLog(`🔄 Prochaine cible : ${["VOUS", "IA 1", "IA 2"][oldPause]}`);
+
+            } else {
+              addLog(`❌ BLOQUÉ ! Défense de ${defP.NAME.split(',')[0]}.`);
+              const newAtk = defenderId;
+              const newDef = attackerId;
+              setAttackerId(newAtk);
+              setDefenderId(newDef);
+              setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null);
+            }
+          }, 1000);
+        }, 1200);
+      }, [attackerId, defenderId, pausedId, lineups, scores, decks]);
+
+      const rollDie = () => {
+        if (phase !== PHASES.IDLE || attackerId !== 0) return;
+        const roll = Math.floor(Math.random() * 6) + 1;
+        setLastRoll(roll); setPhase(PHASES.ROLLING);
+        setTimeout(() => {
+          if (roll <= 5) { 
+            executeDuel(roll-1); 
+          }
+          else { setPhase(PHASES.CHOOSING_TARGET); addLog("🎯 CHOIX LIBRE ! Cliquez sur un défenseur."); }
+        }, 1000);
+      };
+
+      useEffect(() => {
+        if (gameState !== GAME_STATES.PLAYING) return;
+
+        if (attackerId !== 0 && phase === PHASES.IDLE) {
+          const t = setTimeout(() => {
+            const roll = Math.floor(Math.random() * 6) + 1;
+            setLastRoll(roll); setPhase(PHASES.ROLLING);
+            setTimeout(() => {
+              let slot = roll <= 5 ? roll - 1 : 0;
+              if (roll === 6) {
+                let bp = -100;
+                lineups[attackerId].forEach((p, i) => {
+                  const pr = p.OFF - lineups[defenderId][i].DEF;
+                  if (pr > bp) { bp = pr; slot = i; }
+                });
+                executeDuel(slot);
+              } else {
+                executeDuel(slot);
+              }
+            }, 1000);
+          }, 1500);
+          return () => clearTimeout(t);
+        }
+
+        if (phase === PHASES.REPLACING_DEF || phase === PHASES.ATK_SUB_DECISION) {
+          const activeReplacing = phase === PHASES.REPLACING_DEF ? pausedId : attackerId;
+          if (activeReplacing !== 0) {
+            const t = setTimeout(() => {
+              const h = [...hands[activeReplacing]]; const l = [...lineups[activeReplacing]];
+              if (phase === PHASES.REPLACING_DEF) {
+                let bc = -1, bp = -1, bs = -1;
+                h.forEach((card, ci) => {
+                  for (let pi = 0; pi <= l.length; pi++) {
+                    const test = [...l]; test.splice(pi, 0, card);
+                    const orderOk = test.every((x, i) => i === 0 || "SML".indexOf(test[i-1].Poste) <= "SML".indexOf(x.Poste));
+                    const minOk = POSTES.every(pos => test.some(x => x.Poste === pos));
+                    const maxOk = POSTES.every(pos => test.filter(x => x.Poste === pos).length <= 2);
+
+                    if (orderOk && minOk && maxOk) {
+                      const s = test.reduce((acc, x) => acc + x.OFF + x.DEF, 0);
+                      if (s > bs) { bs = s; bc = ci; bp = pi; }
+                    }
+                  }
+                });
+                if (bc !== -1) {
+                  const nL = [...l]; nL.splice(bp, 0, h[bc]);
+                  const nH = h.filter((_, i) => i !== bc);
+                  if (pendingDraw && pendingDraw.playerId === activeReplacing) {
+                    const d = decks[pendingDraw.poste];
+                    if (d.length > 0) { nH.push(d[0]); setDecks(v => ({...v, [pendingDraw.poste]: v[pendingDraw.poste].slice(1)})); }
+                    setPendingDraw(null);
+                  }
+                  const nLineups = [...lineups]; nLineups[activeReplacing] = nL;
+                  const nHands = [...hands]; nHands[activeReplacing] = nH;
+                  setLineups(nLineups); setHands(nHands); setPhase(PHASES.ATK_SUB_DECISION);
+                }
+              } else {
+                setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null);
+              }
+            }, 1000);
+            return () => clearTimeout(t);
+          }
+        }
+      }, [phase, attackerId, defenderId, pausedId, gameState, lineups, hands, decks, pendingDraw, executeDuel]);
+
+      const getUserBoardStyle = () => {
+        if (attackerId === 0) return 'ring-4 ring-yellow-500 border-yellow-500/50 bg-gradient-to-br from-yellow-900/40 via-yellow-900/20 to-black glow-gold';
+        if (defenderId === 0) return 'ring-4 ring-slate-400 border-slate-400/50 bg-gradient-to-br from-slate-700/40 via-slate-800/20 to-black glow-silver';
+        return 'border-blue-500/20 bg-blue-900/10';
+      };
+
+      const currentAtkPlayer = (phase === PHASES.DUEL || phase === PHASES.ROLLING) && targetSlot !== null ? lineups[attackerId][targetSlot] : null;
+      const currentDefPlayer = (phase === PHASES.DUEL || phase === PHASES.ROLLING) && targetSlot !== null ? lineups[defenderId][targetSlot] : null;
+
+      return (
+        <div className="min-h-screen p-4 md:p-6 overflow-x-hidden">
+          {/* Elargissement du header */}
+          <header className="max-w-[95%] mx-auto flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
+            <div className="flex items-center gap-4">
+              <div className="bg-orange-600 p-3 rounded-2xl shadow-xl border border-orange-500/50"><Icons.Trophy /></div>
+              <div>
+                <h1 className="text-2xl font-black italic uppercase leading-none tracking-tighter text-white">Basket Arena</h1>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Édition Tactique 3 Joueurs</p>
+              </div>
+            </div>
+
+            <div className="flex bg-slate-900/80 border border-slate-800 rounded-3xl p-1 items-center shadow-2xl">
+              <ScoreBox label="VOUS" score={scores[0]} active={attackerId === 0} isDef={defenderId === 0} />
+              <div className="w-px h-8 bg-slate-800 mx-2"></div>
+              <ScoreBox label="IA 1" score={scores[1]} active={attackerId === 1} isDef={defenderId === 1} />
+              <div className="w-px h-8 bg-slate-800 mx-2"></div>
+              <ScoreBox label="IA 2" score={scores[2]} active={attackerId === 2} isDef={defenderId === 2} />
+            </div>
+          </header>
+
+          {/* Elargissement du conteneur principal */}
+          <main className="max-w-[95%] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-9 space-y-6">
+              {gameState === GAME_STATES.LOADING ? (
+                <div className="bg-slate-900/50 border-2 border-dashed border-slate-800 rounded-3xl p-16 text-center">
+                  <Icons.Basketball className="mx-auto mb-4 text-slate-700" />
+                  <h2 className="text-xl font-bold mb-4 uppercase">Chargement des données</h2>
+                  <p className="text-slate-400 text-sm mb-6">
+                    Le jeu essaie de charger automatiquement <span className="font-mono text-slate-200">{AUTO_CSV_URL}</span>.
+                    <br />Si ce fichier n'existe pas, importez un CSV.
+                  </p>
+                  <label className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-black cursor-pointer shadow-xl transition-all inline-block">
+                    SÉLECTIONNER CSV <input type="file" accept=".csv" onChange={handleManualUpload} className="hidden" />
+                  </label>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <AITeamZone
+                      teamId={1} label="IA 1" lineup={lineups[1]}
+                      isAttacking={attackerId === 1} isDefending={defenderId === 1}
+                      targetSlot={targetSlot} isDuelActive={phase === PHASES.DUEL}
+                      onSlotClick={(i) => phase === PHASES.CHOOSING_TARGET && defenderId === 1 && executeDuel(i)}
+                    />
+                    <AITeamZone
+                      teamId={2} label="IA 2" lineup={lineups[2]}
+                      isAttacking={attackerId === 2} isDefending={defenderId === 2}
+                      targetSlot={targetSlot} isDuelActive={phase === PHASES.DUEL}
+                      onSlotClick={(i) => phase === PHASES.CHOOSING_TARGET && defenderId === 2 && executeDuel(i)}
+                    />
+                  </div>
+
+                  <div className="bg-slate-900/40 border border-slate-800 rounded-[2.5rem] p-8 min-h-[160px] flex flex-col items-center justify-center relative shadow-inner">
+                    {gameState === GAME_STATES.PREGAME ? (
+                      <button onClick={validatePregame} className="bg-orange-600 hover:bg-orange-500 text-white px-12 py-4 rounded-2xl font-black text-lg shadow-2xl transition-all flex items-center gap-2 hover:scale-105">
+                        VALIDER MON 5 MAJEUR <Icons.Plus />
+                      </button>
+                    ) : gameState === GAME_STATES.GAMEOVER ? (
+                      <div className="text-center">
+                        <h2 className="text-4xl font-black italic uppercase mb-4 text-white">Match Terminé</h2>
+                        <button onClick={() => window.location.reload()} className="bg-white text-black px-8 py-2 rounded-lg font-bold">REJOUER</button>
+                      </div>
+                    ) : (
+                      <div className="w-full flex flex-col items-center gap-6">
+                        <div className="flex items-center justify-center gap-4 md:gap-16 w-full max-w-2xl">
+                          <div className="w-24 md:w-32 flex justify-end">
+                            {currentAtkPlayer && (
+                              <div className="animate-pop-stat flex flex-col items-end">
+                                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-1">ATTAQUE</span>
+                                <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 text-black w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-[0_0_20px_rgba(234,179,8,0.4)] border-2 border-yellow-200/50">
+                                  {currentAtkPlayer.OFF}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="relative z-10">
+                            <button
+                              onClick={rollDie}
+                              disabled={phase !== PHASES.IDLE || attackerId !== 0}
+                              className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center transition-all border-4 shadow-2xl
+                                ${attackerId === 0 && phase === PHASES.IDLE ? 'bg-orange-600 border-orange-400 hover:scale-110' : 'bg-slate-800 border-slate-700'}
+                              `}
+                            >
+                              {lastRoll ? (
+                                <span className="text-3xl md:text-4xl font-black text-white">{lastRoll}</span>
+                              ) : (
+                                <Icons.Basketball className={`${phase === PHASES.ROLLING ? 'animate-roll' : ''}`} />
+                              )}
+                            </button>
+                            {shotResult && (
+                              <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                                <div className={`px-4 py-1.5 rounded-full text-white font-black italic uppercase text-xs shadow-2xl ${shotResult.success ? 'bg-green-600' : 'bg-red-600'}`}>
+                                  {shotResult.success ? "PANIER !" : "RATÉ"}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="w-24 md:w-32 flex justify-start">
+                            {currentDefPlayer && (
+                              <div className="animate-pop-stat flex flex-col items-start">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">DÉFENSE</span>
+                                <div className="bg-gradient-to-br from-slate-300 to-slate-500 text-black w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-[0_0_20px_rgba(148,163,184,0.4)] border-2 border-slate-100/50">
+                                  {currentDefPlayer.DEF}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <StatusLine
+                          phase={phase}
+                          attackerId={attackerId}
+                          defenderId={defenderId}
+                          onSkip={() => { setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null); }}
+                          onSub={() => setPhase(PHASES.REMOVING_ATK)}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div data-team-id={0}
+                    className={`p-4 md:p-6 rounded-[2.5rem] border team-zone-transition relative shadow-lg ${getUserBoardStyle()}`}>
+                    <div className={`absolute -top-3 left-8 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg
+                      ${attackerId === 0 ? 'bg-yellow-600' : defenderId === 0 ? 'bg-slate-500' : 'bg-blue-600'}
+                    `}>
+                        {attackerId === 0 ? "🔥 VOUS ATTAQUEZ" : defenderId === 0 ? "🛡️ VOUS DÉFENDEZ" : "VOUS (EN PAUSE)"}
+                    </div>
+                    <div className="flex justify-center items-center gap-1.5 md:gap-2 min-h-[140px] md:min-h-[220px] w-full px-2 py-2">
+                      {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF) && <DropZone onClick={() => handleInsertion(0)} />}
+                      {lineups[0].map((p, i) => (
+                        <React.Fragment key={i}>
+                          <PlayerCard player={p}
+                             isTarget={defenderId === 0 && targetSlot === i}
+                             isAttacker={attackerId === 0 && targetSlot === i && (phase === PHASES.ROLLING || phase === PHASES.DUEL)}
+                             isJumping={phase === PHASES.DUEL && targetSlot === i && (attackerId === 0 || defenderId === 0)}
+                             onClick={() => handleLineupClick(i)}
+                             disabled={gameState !== GAME_STATES.PREGAME && phase !== PHASES.REMOVING_ATK} />
+                          {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF) && <DropZone onClick={() => handleInsertion(i + 1)} />}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-900/60 rounded-[2rem] p-4 border border-slate-800 shadow-xl">
+                    <h3 className="text-[11px] font-black uppercase text-slate-500 flex items-center gap-2 mb-4 md:mb-6"><Icons.UserPlus /> Banc de touche</h3>
+                    <div className="flex gap-2 md:gap-4 overflow-x-auto pb-2 scrollbar-hide px-2">
+                      {hands[0].map((p, i) => (
+                        <PlayerCard
+                          key={i} player={p} size="sm"
+                          selected={selectedInHand === i}
+                          onClick={() => {
+                            if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) {
+                              setSelectedInHand(i); setPhase(PHASES.PLACING_REPLACEMENT);
+                            } else {
+                              setSelectedInHand(i === selectedInHand ? null : i);
+                            }
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <aside className="lg:col-span-3 flex flex-col gap-6">
+              <div className="bg-black/50 backdrop-blur rounded-3xl p-5 border border-slate-800 h-[300px] overflow-hidden flex flex-col shadow-2xl">
+                <div className="flex items-center gap-2 mb-4 text-[11px] font-black text-slate-500 uppercase tracking-widest"><Icons.History /> Chronologie</div>
+                <div className="overflow-y-auto flex-1 space-y-2 pr-2 scrollbar-hide">
+                  {logs.map((log, i) => (
+                    <div key={i} className={`p-3 rounded-xl text-[10px] font-medium leading-snug ${log.includes('🏀') ? 'bg-orange-500/10 text-orange-400' : 'bg-slate-800/40 text-slate-400'}`}>
+                      {log}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-slate-900/50 rounded-3xl p-6 border border-slate-800 flex-1 text-[11px] shadow-xl text-slate-400 leading-relaxed">
+                <h4 className="font-black uppercase text-slate-300 mb-4">Règles du jeu</h4>
+
+                <div className="space-y-3">
+                  <p>
+                    <b className="text-yellow-500">OBJECTIF :</b> Être le premier à atteindre <b>10 points</b>.
+                    Un panier réussi = <b>+1</b>.
+                  </p>
+
+                  <p>
+                    <b className="text-orange-400">MISE EN PLACE :</b> Chaque équipe joue avec <b>5 joueurs</b> sur le terrain.
+                    Avant le début, vous construisez votre <b>5 majeur</b> depuis votre banc.
+                  </p>
+
+                  <p>
+                    <b className="text-blue-400">CONTRAINTES D’ÉQUIPE :</b>
+                    <br />• Toujours <b>5 joueurs</b> sur le terrain
+                    <br />• Minimum <b>1 S</b>, <b>1 M</b>, <b>1 L</b>
+                    <br />• Maximum <b>2</b> joueurs du même poste
+                    <br />• Ordre obligatoire sur le terrain : <b>S → M → L</b>
+                  </p>
+
+                  <p>
+                    <b className="text-slate-200">DÉROULÉ D’UN TOUR (ATTAQUE) :</b>
+                    <br />1) L’attaquant lance le <b>dé</b>.
+                    <br />2) Résultat <b>1–5</b> : duel sur le joueur adverse du même “slot” (position).
+                    <br />3) Résultat <b>6</b> : <b>choix libre</b> — l’attaquant sélectionne le défenseur ciblé.
+                  </p>
+
+                  <p>
+                    <b className="text-slate-200">DUEL :</b> On compare l’<b>OFF</b> de l’attaquant à la <b>DEF</b> du défenseur.
+                    Le jeu calcule une probabilité, puis décide :
+                    <br />• <b>Réussi</b> → panier (+1) et un défenseur est éliminé
+                    <br />• <b>Raté</b> → ballon perdu : l’attaque change de camp
+                  </p>
+
+                  <p>
+                    <b className="text-slate-200">APRÈS UN PANIER :</b>
+                    <br />• Le défenseur ciblé est <b>retiré</b> du terrain
+                    <br />• Il retourne dans la <b>pioche</b> de son poste (S/M/L)
+                    <br />• Le défenseur doit immédiatement <b>remplacer</b> pour revenir à 5 joueurs
+                  </p>
+
+                  <p>
+                    <b className="text-slate-200">REMPLACEMENTS :</b>
+                    <br />• Le joueur qui remplace vient du <b>banc</b>
+                    <br />• Vous choisissez le joueur, puis sa position d’insertion (boutons “+”)
+                    <br />• Les contraintes (S/M/L, max 2, ordre S→M→L) doivent rester valides
+                  </p>
+
+                  <p>
+                    <b className="text-slate-200">ROTATION DES RÔLES (3 JOUEURS) :</b>
+                    Après un panier, les rôles tournent :
+                    <br />• Le défenseur éliminé devient <b>en pause</b>
+                    <br />• L’équipe en pause devient la <b>nouvelle cible</b>
+                    <br />• L’attaquant reste l’attaquant tant qu’il marque
+                  </p>
+
+                  <p>
+                    <b className="text-slate-400">IA :</b> L’IA choisit automatiquement ses remplaçants en privilégiant les options
+                    les plus fortes <b>tout en respectant</b> les contraintes d’équipe.
+                  </p>
+                </div>
+                <button onClick={() => window.location.reload()} className="mt-6 w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-200 font-black uppercase transition-all">
+                  Reset Match
+                </button>
+              </div>
+            </aside>
+          </main>
+        </div>
+      );
+    }
+
+    // --- PETITS COMPOSANTS ---
+    const ScoreBox = ({ label, score, active, isDef }) => {
+      const activeStyle = active ? 'ring-2 ring-yellow-500 bg-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.3)]' : isDef ? 'ring-2 ring-slate-400 bg-slate-400/20 shadow-[0_0_15px_rgba(148,163,184,0.3)]' : '';
+      const colorText = active ? 'text-yellow-400' : isDef ? 'text-slate-200' : 'text-slate-600';
+      
+      return (
+        <div className={`px-4 md:px-5 py-2 text-center rounded-2xl transition-all duration-500 ${activeStyle}`}>
+          <p className="text-[8px] font-black uppercase tracking-widest text-slate-500">{label}</p>
+          <p className={`text-xl md:text-2xl font-black ${colorText}`}>{score}</p>
+        </div>
+      );
+    };
+
+    const AITeamZone = ({ label, lineup, isAttacking, isDefending, targetSlot, isDuelActive, onSlotClick, teamId }) => {
+      const ring = isAttacking
+        ? 'ring-4 ring-yellow-500 border-yellow-500/50 bg-gradient-to-br from-yellow-900/40 via-yellow-900/20 to-black glow-gold'
+        : isDefending
+          ? 'ring-4 ring-slate-400 border-slate-400/50 bg-gradient-to-br from-slate-700/40 via-slate-800/20 to-black glow-silver'
+          : 'border-slate-800 bg-slate-900/20';
+      
+      return (
+        <div data-team-id={teamId} className={`p-3 md:p-4 rounded-3xl border team-zone-transition relative shadow-lg ${ring} w-full min-w-0`}>
+          <div className={`absolute -top-2.5 left-6 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg uppercase whitespace-nowrap
+            ${isAttacking ? 'bg-yellow-600' : isDefending ? 'bg-slate-500' : 'bg-slate-800'}
+          `}>
+            {isAttacking ? `🔥 ${label} ATTAQUE` : isDefending ? `🛡️ ${label} DÉFEND` : label}
+          </div>
+          <div className="flex justify-center items-center gap-1 md:gap-2 min-h-[120px] md:min-h-[220px] w-full py-2">
+            {lineup.map((p, i) => (
+              <PlayerCard
+                key={i} player={p} size="sm"
+                isTarget={isDefending && targetSlot === i}
+                isAttacker={isAttacking && targetSlot === i}
+                isJumping={isDuelActive && targetSlot === i && (isAttacking || isDefending)}
+                canBeTargeted={isDefending && !targetSlot}
+                onClick={() => onSlotClick(i)}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    const StatusLine = ({ phase, attackerId, defenderId, onSkip, onSub }) => {
+      const names = ["VOUS", "IA 1", "IA 2"];
+      if (phase === PHASES.ATK_SUB_DECISION && attackerId === 0) {
+        return (
+          <div className="flex gap-4">
+            <button onClick={onSub} className="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-blue-500 transition-all shadow-lg">🔄 Remplacer</button>
+            <button onClick={onSkip} className="bg-slate-800 px-6 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-slate-700 transition-all">🏀 Continuer</button>
+          </div>
+        );
+      }
+      let txt = "";
+      if (phase === PHASES.REPLACING_DEF) txt = `Un joueur doit être remplacé.`;
+      else if (phase === PHASES.REMOVING_ATK) txt = "Choisissez le joueur à sortir.";
+      else if (phase === PHASES.PLACING_REPLACEMENT) txt = "Où insérer le nouveau joueur ? (+) ";
+      else if (attackerId === 0) txt = phase === PHASES.CHOOSING_TARGET ? "🎯 CLIQUEZ SUR UNE CARTE ADVERSE !" : `Votre tour ! Cible : ${names[defenderId]}`;
+      else txt = `${names[attackerId]} est à l'offensive...`;
+      return <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 tracking-widest">{txt}</p>;
+    };
+
+    const DropZone = ({ onClick }) => (
+      <div onClick={onClick} className="drop-zone group">
+        <Icons.Plus />
+      </div>
+    );
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
