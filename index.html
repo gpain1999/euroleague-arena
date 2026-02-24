@@ -222,16 +222,17 @@
     // ==============================
     // PLAYER CARD
     // ==============================
-    const PlayerCard = ({ player, onClick, selected, disabled, isTarget, isAttacker, isJumping, canBeTargeted, size = "md" }) => {
+    const PlayerCard = ({ player, onClick, selected, disabled, isTarget, isAttacker, isJumping, canBeTargeted, size = "md", grayed = false }) => {
       if (!player) return null;
       const cardBaseWidth = "w-[18%]";
       const maxWidth = size === "sm" ? "max-w-[140px]" : "max-w-[180px]";
       return (
         <div
-          onClick={!disabled || canBeTargeted ? onClick : undefined}
+          onClick={(!disabled || canBeTargeted) && !grayed ? onClick : undefined}
           style={{ aspectRatio: '800/1117' }}
-          className={`relative rounded-lg md:rounded-xl overflow-hidden shadow-2xl transition-all duration-300 cursor-pointer flex-shrink-0
+          className={`relative rounded-lg md:rounded-xl overflow-hidden shadow-2xl transition-all duration-300 flex-shrink-0
             ${cardBaseWidth} ${maxWidth} bg-slate-800 card-shadow
+            ${grayed ? 'opacity-30 cursor-not-allowed grayscale' : 'cursor-pointer'}
             ${selected ? 'ring-2 md:ring-4 ring-blue-500 z-20' : ''}
             ${isTarget || isAttacker ? 'ring-2 md:ring-4 ring-orange-500 z-30 scale-105' : ''}
             ${isJumping ? 'animate-bounce' : ''}
@@ -596,7 +597,7 @@
                     <div className="text-slate-300 text-xs">Devient la<br/>nouvelle DÉFENSE</div>
                   </div>
                 </div>
-                <div className="mt-4 text-slate-400 text-xs text-center">Si le tir est <strong className="text-red-400">raté</strong>, le défenseur devient l'attaquant et les rôles s'inversent.</div>
+                <div className="mt-4 text-slate-400 text-xs text-center">Si le tir est <strong className="text-red-400">raté</strong>, le défenseur devient l'attaquant et l'attaquant devient défenseur. Le joueur en pause reste en pause.</div>
               </div>
             </RuleBlock>
 
@@ -690,8 +691,20 @@
                       onClick={() => setSelectedTeam(team)}
                       className="team-card-btn bg-slate-900 border border-slate-700 hover:border-orange-500/60 rounded-2xl p-4 text-center group"
                     >
-                      <div className="w-12 h-12 bg-gradient-to-br from-orange-600/20 to-orange-800/20 border border-orange-500/20 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:border-orange-500/50 transition-all">
-                        <Icons.Basketball size={24} className="text-orange-500" />
+                      <div className="w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                        <img
+                          src={`logo/${team}.png`}
+                          alt={team}
+                          className="w-12 h-12 object-contain"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div style={{display:'none'}} className="w-12 h-12 bg-gradient-to-br from-orange-600/20 to-orange-800/20 border border-orange-500/20 rounded-xl items-center justify-center group-hover:border-orange-500/50 transition-all">
+                          <Icons.Basketball size={24} className="text-orange-500" />
+                        </div>
                       </div>
                       <div className="font-display font-black text-sm italic uppercase text-white leading-tight">{team}</div>
                       <div className="text-slate-500 text-xs font-bold mt-1">{count} cartes</div>
@@ -766,6 +779,7 @@
       const [targetSlot, setTargetSlot] = useState(null);
       const [shotResult, setShotResult] = useState(null);
       const [pendingDraw, setPendingDraw] = useState(null);
+      const [subDoneThisTurn, setSubDoneThisTurn] = useState(false);
       const [showStatsModal, setShowStatsModal] = useState(false);
       const [stats, setStats] = useState([{}, {}, {}]);
       const [overlay, setOverlay] = useState(null); // 'RULES' | 'CARDS' | null
@@ -908,7 +922,7 @@
           setPendingDraw(null);
         }
         setHands(newHands); setLineups(newLineups); setSelectedInHand(null);
-        if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) { setPhase(PHASES.ATK_SUB_DECISION); addLog("Remplacement effectué."); }
+        if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) { setPhase(PHASES.ATK_SUB_DECISION); addLog("Remplacement effectué."); setSubDoneThisTurn(true); }
       };
 
       const validatePregame = () => {
@@ -954,7 +968,7 @@
               const nLineups = [...lineups]; nLineups[defenderId].splice(slot, 1); setLineups(nLineups);
               setDecks(prev => ({ ...prev, [lost.Poste]: [...prev[lost.Poste], lost] }));
               setPendingDraw({ playerId: defenderId, poste: lost.Poste });
-              setTargetSlot(null); setPhase(PHASES.REPLACING_DEF);
+              setTargetSlot(null); setPhase(PHASES.REPLACING_DEF); setSubDoneThisTurn(false);
               const oldDef = defenderId; const oldPause = pausedId;
               setDefenderId(oldPause); setPausedId(oldDef);
               addLog(`🔄 Prochaine cible : ${["VOUS","IA 1","IA 2"][oldPause]}`);
@@ -1173,7 +1187,7 @@
                         )}
                       </div>
                     </div>
-                    <StatusLine phase={phase} attackerId={attackerId} defenderId={defenderId} onSkip={() => { setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null); }} onSub={() => setPhase(PHASES.REMOVING_ATK)} />
+                    <StatusLine phase={phase} attackerId={attackerId} defenderId={defenderId} subDoneThisTurn={subDoneThisTurn} onSkip={() => { setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null); }} onSub={() => setPhase(PHASES.REMOVING_ATK)} />
                   </div>
                 )}
               </div>
@@ -1184,7 +1198,22 @@
                   {attackerId === 0 ? "🔥 VOUS ATTAQUEZ" : defenderId === 0 ? "🛡️ VOUS DÉFENDEZ" : "VOUS (EN PAUSE)"}
                 </div>
                 <div className="flex justify-center items-center gap-1.5 md:gap-2 min-h-[140px] md:min-h-[220px] w-full px-2 py-2">
-                  {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0)) && <DropZone onClick={() => handleInsertion(0)} />}
+                  {(() => {
+                    const showZones = gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0);
+                    const canInsertAt = (insertIdx) => {
+                      if (!showZones) return false;
+                      if (selectedInHand === null) return false; // pas de carte sélectionnée : aucun +
+                      const card = hands[0][selectedInHand];
+                      const orderMap = { 'S': 1, 'M': 2, 'L': 3 };
+                      const test = [...lineups[0]];
+                      test.splice(insertIdx, 0, card);
+                      for (let k = 0; k < test.length - 1; k++) {
+                        if (orderMap[test[k].Poste] > orderMap[test[k+1].Poste]) return false;
+                      }
+                      return true;
+                    };
+                    return canInsertAt(0) ? <DropZone onClick={() => handleInsertion(0)} /> : null;
+                  })()}
                   {lineups[0].map((p, i) => (
                     <React.Fragment key={i}>
                       <PlayerCard player={p}
@@ -1193,7 +1222,22 @@
                         isJumping={phase === PHASES.DUEL && targetSlot === i && (attackerId === 0 || defenderId === 0)}
                         onClick={() => handleLineupClick(i)}
                         disabled={gameState !== GAME_STATES.PREGAME && phase !== PHASES.REMOVING_ATK} />
-                      {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0)) && <DropZone onClick={() => handleInsertion(i + 1)} />}
+                      {(() => {
+                        const showZones = gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0);
+                        const canInsertAt = (insertIdx) => {
+                          if (!showZones) return false;
+                          if (selectedInHand === null) return false;
+                          const card = hands[0][selectedInHand];
+                          const orderMap = { 'S': 1, 'M': 2, 'L': 3 };
+                          const test = [...lineups[0]];
+                          test.splice(insertIdx, 0, card);
+                          for (let k = 0; k < test.length - 1; k++) {
+                            if (orderMap[test[k].Poste] > orderMap[test[k+1].Poste]) return false;
+                          }
+                          return true;
+                        };
+                        return canInsertAt(i + 1) ? <DropZone onClick={() => handleInsertion(i + 1)} /> : null;
+                      })()}
                     </React.Fragment>
                   ))}
                 </div>
@@ -1202,13 +1246,56 @@
               <div className="bg-slate-900/60 rounded-[2rem] p-4 border border-slate-800 shadow-xl">
                 <h3 className="text-[11px] font-black uppercase text-slate-500 flex items-center gap-2 mb-4 md:mb-6"><Icons.UserPlus /> Banc de touche</h3>
                 <div className="flex gap-2 md:gap-4 overflow-x-auto pb-2 scrollbar-hide px-2">
-                  {hands[0].map((p, i) => (
-                    <PlayerCard key={i} player={p} size="sm" selected={selectedInHand === i}
-                      onClick={() => {
-                        if ((phase === PHASES.REPLACING_DEF && pausedId === 0) || phase === PHASES.PLACING_REPLACEMENT) { setSelectedInHand(i); setPhase(PHASES.PLACING_REPLACEMENT); }
-                        else { setSelectedInHand(i === selectedInHand ? null : i); }
-                      }} />
-                  ))}
+                  {(() => {
+                    const currentLineup = lineups[0];
+                    const isSelectingMode = gameState === GAME_STATES.PREGAME
+                      || phase === PHASES.PLACING_REPLACEMENT
+                      || (phase === PHASES.REPLACING_DEF && pausedId === 0);
+
+                    const isBenchCardPlayable = (card) => {
+                      if (!isSelectingMode) return true; // pas en mode sélection = pas grisé
+
+                      // Déjà 5 joueurs sur le terrain (sauf si on est en train de remplacer, auquel qu'on a déjà sorti quelqu'un)
+                      const maxOnField = (phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0)) ? 4 : 4;
+                      if (currentLineup.length >= 5) return false;
+
+                      // Déjà 2 joueurs de ce poste sur le terrain
+                      const posOnField = currentLineup.filter(p => p.Poste === card.Poste).length;
+                      if (posOnField >= 2) return false;
+
+                      // Vérifier si l'ajout de ce joueur peut encore mener à un 5 valide
+                      // Un poste manquant = poste non présent sur le terrain ET non couvrable avec les cartes restantes du banc (hors cette carte)
+                      const afterLineup = [...currentLineup, card];
+                      const slotsLeft = 5 - afterLineup.length;
+                      const remainingBench = hands[0].filter((_, bi) => hands[0][bi] !== card);
+
+                      // Pour chaque poste, vérifier qu'on a au moins 1 exemplaire (terrain ou banc restant)
+                      const missingPostes = POSTES.filter(pos => {
+                        const onField = afterLineup.filter(p => p.Poste === pos).length;
+                        if (onField > 0) return false; // déjà couvert
+                        // Peut-on encore le couvrir avec le banc restant ?
+                        const availInBench = remainingBench.filter(p => p.Poste === pos).length;
+                        return availInBench === 0;
+                      });
+                      if (missingPostes.length > 0) return false;
+
+                      // Vérifier qu'avec les slots restants on peut couvrir tous les postes manquants après cet ajout
+                      const uncoveredPostes = POSTES.filter(pos => afterLineup.filter(p => p.Poste === pos).length === 0);
+                      if (uncoveredPostes.length > slotsLeft) return false;
+
+                      return true;
+                    };
+
+                    return hands[0].map((p, i) => (
+                      <PlayerCard key={i} player={p} size="sm" selected={selectedInHand === i}
+                        grayed={isSelectingMode && !isBenchCardPlayable(p)}
+                        onClick={() => {
+                          if (!isBenchCardPlayable(p)) return;
+                          if ((phase === PHASES.REPLACING_DEF && pausedId === 0) || phase === PHASES.PLACING_REPLACEMENT) { setSelectedInHand(i); setPhase(PHASES.PLACING_REPLACEMENT); }
+                          else { setSelectedInHand(i === selectedInHand ? null : i); }
+                        }} />
+                    ));
+                  })()}
                 </div>
               </div>
             </div>
@@ -1277,12 +1364,14 @@
       );
     };
 
-    const StatusLine = ({ phase, attackerId, defenderId, onSkip, onSub }) => {
+    const StatusLine = ({ phase, attackerId, defenderId, onSkip, onSub, subDoneThisTurn }) => {
       const names = ["VOUS", "IA 1", "IA 2"];
       if (phase === PHASES.ATK_SUB_DECISION && attackerId === 0) {
         return (
           <div className="flex gap-4">
-            <button onClick={onSub} className="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-blue-500 transition-all shadow-lg">🔄 Remplacer</button>
+            {!subDoneThisTurn && (
+              <button onClick={onSub} className="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-blue-500 transition-all shadow-lg">🔄 Remplacer</button>
+            )}
             <button onClick={onSkip} className="bg-slate-800 px-6 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-slate-700 transition-all">🏀 Continuer</button>
           </div>
         );
