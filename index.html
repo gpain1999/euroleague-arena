@@ -5,26 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Basket Arena - Duel Central</title>
 
-  <!-- Bibliothèques React et Tailwind via CDN -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Confettis -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-    body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,900;1,900&family=Barlow:wght@400;600;700&display=swap');
+
+    :root {
+      --orange: #f97316;
+      --gold: #eab308;
+      --bg: #020617;
+    }
+
+    * { box-sizing: border-box; }
+    body { font-family: 'Barlow', sans-serif; background-color: var(--bg); color: #f8fafc; margin: 0; }
+
+    .font-display { font-family: 'Barlow Condensed', sans-serif; }
+
     .scrollbar-hide::-webkit-scrollbar { display: none; }
     .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* Animations */
-    @keyframes roll {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    @keyframes roll { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .animate-roll { animation: roll 1s linear infinite; }
 
     @keyframes popStat {
@@ -34,7 +38,24 @@
     }
     .animate-pop-stat { animation: popStat 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+    .fade-in-up-1 { animation: fadeInUp 0.6s ease 0.1s both; }
+    .fade-in-up-2 { animation: fadeInUp 0.6s ease 0.2s both; }
+    .fade-in-up-3 { animation: fadeInUp 0.6s ease 0.3s both; }
+    .fade-in-up-4 { animation: fadeInUp 0.6s ease 0.4s both; }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(249,115,22,0.3); }
+      50% { box-shadow: 0 0 40px rgba(249,115,22,0.6); }
+    }
+    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+    .card-shadow { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
+
     .drop-zone {
       border: 2px dashed #334155;
       border-radius: 9999px;
@@ -47,17 +68,58 @@
       flex-shrink: 0;
       transition: all 0.2s;
     }
-    .drop-zone:hover {
-      border-color: #3b82f6;
-      background: rgba(59, 130, 246, 0.1);
-    }
-    
-    .team-zone-transition {
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    .drop-zone:hover { border-color: #3b82f6; background: rgba(59,130,246,0.1); }
+
+    .team-zone-transition { transition: all 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .glow-gold { box-shadow: 0 0 40px -10px rgba(234,179,8,0.2); }
+    .glow-silver { box-shadow: 0 0 40px -10px rgba(148,163,184,0.2); }
+
+    /* HOME SCREEN */
+    .home-bg {
+      background: radial-gradient(ellipse at 30% 20%, rgba(249,115,22,0.15) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(234,179,8,0.1) 0%, transparent 50%),
+                  #020617;
     }
 
-    .glow-gold { box-shadow: 0 0 40px -10px rgba(234, 179, 8, 0.2); }
-    .glow-silver { box-shadow: 0 0 40px -10px rgba(148, 163, 184, 0.2); }
+    .home-btn {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .home-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.4s ease;
+    }
+    .home-btn:hover::before { left: 100%; }
+    .home-btn:hover { transform: translateY(-2px); }
+
+    /* RULES */
+    .rule-section {
+      border-left: 3px solid;
+      padding-left: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* CARD GALLERY */
+    .team-card-btn {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .team-card-btn:hover { transform: translateY(-4px); }
+    .team-card-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .team-card-btn:hover::after { opacity: 1; }
   </style>
 </head>
 
@@ -65,16 +127,18 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    // --- ICONES SVG ---
     const Icons = {
-      Trophy: () => (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+      Trophy: ({ size = 24 }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+          <path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
         </svg>
       ),
-      Basketball: ({ className }) => (
-        <svg className={className} width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/><path d="M3.5 12h17"/><path d="M12 3.5v17"/><path d="M5 5a12 12 0 0 1 14 14"/><path d="M19 5a12 12 0 0 0-14 14"/>
+      Basketball: ({ className, size = 48 }) => (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M3.5 12h17"/><path d="M12 3.5v17"/>
+          <path d="M5 5a12 12 0 0 1 14 14"/><path d="M19 5a12 12 0 0 0-14 14"/>
         </svg>
       ),
       History: () => (
@@ -84,37 +148,60 @@
       ),
       UserPlus: () => (
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/>
         </svg>
       ),
       Plus: () => (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-      )
+      ),
+      Book: () => (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+        </svg>
+      ),
+      Cards: () => (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="16" height="20" x="2" y="2" rx="2" ry="2"/><path d="M7 2v20"/><path d="M17 2v20"/>
+          <path d="M2 12h20"/><path d="M2 7h5"/><path d="M2 17h5"/>
+        </svg>
+      ),
+      Play: () => (
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      ),
+      ArrowLeft: () => (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+        </svg>
+      ),
+      ChevronRight: () => (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
+      ),
     };
 
-    const GAME_STATES = { LOADING: 'LOADING', PREGAME: 'PREGAME', PLAYING: 'PLAYING', GAMEOVER: 'GAMEOVER' };
+    const GAME_STATES = { LOADING: 'LOADING', HOME: 'HOME', PREGAME: 'PREGAME', PLAYING: 'PLAYING', GAMEOVER: 'GAMEOVER' };
     const PHASES = {
       IDLE: 'IDLE', ROLLING: 'ROLLING', CHOOSING_TARGET: 'CHOOSING_TARGET',
       DUEL: 'DUEL', REPLACING_DEF: 'REPLACING_DEF', PLACING_REPLACEMENT: 'PLACING_REPLACEMENT',
       ATK_SUB_DECISION: 'ATK_SUB_DECISION', REMOVING_ATK: 'REMOVING_ATK'
     };
     const POSTES = ['S', 'M', 'L'];
-
-    // ✅ chemin du CSV auto (hébergement statique)
     const AUTO_CSV_URL = 'data/players.csv';
 
     const { useState, useEffect, useCallback } = React;
 
-    // ✅ parse CSV ; séparateur ";" + conversion num + dédoublonnage PLAYER_ID
     const parsePlayersCsv = (csvText) => {
       const lines = csvText.trim().split(/\r?\n/);
       if (!lines.length) return [];
       const headers = lines[0].split(';').map(h => h.trim());
       const seenPlayerIds = new Set();
-
-      const players = lines.slice(1).map(line => {
+      return lines.slice(1).map(line => {
         const values = line.split(';');
         const obj = {};
         headers.forEach((h, i) => {
@@ -130,17 +217,15 @@
         seenPlayerIds.add(pid);
         return true;
       });
-
-      return players;
     };
 
-    // --- COMPOSANTS UI ---
+    // ==============================
+    // PLAYER CARD
+    // ==============================
     const PlayerCard = ({ player, onClick, selected, disabled, isTarget, isAttacker, isJumping, canBeTargeted, size = "md" }) => {
       if (!player) return null;
-      
       const cardBaseWidth = "w-[18%]";
       const maxWidth = size === "sm" ? "max-w-[140px]" : "max-w-[180px]";
-
       return (
         <div
           onClick={!disabled || canBeTargeted ? onClick : undefined}
@@ -153,7 +238,7 @@
             ${canBeTargeted ? 'ring-2 md:ring-4 ring-yellow-400' : ''}`}
         >
           <img
-            src={`cartes2/${String(player.TEAM_y || player.TEAM_x).trim()}_card_${player.PLAYER_ID}.png`}
+            src={`cartes2/${String(player.TEAM_y || player.TEAM_x || '').trim()}_card_${player.PLAYER_ID}.png`}
             alt={player.NAME}
             className="w-full h-full object-cover"
             onError={(e) => {
@@ -175,255 +260,738 @@
       );
     };
 
-    // --- APPLICATION PRINCIPALE ---
+    // ==============================
+    // HOME SCREEN
+    // ==============================
+    const HomeScreen = ({ onPlay, onRules, onCards }) => {
+      return (
+        <div className="home-bg min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-orange-500/5 blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-yellow-500/5 blur-3xl" />
+            {/* Decorative lines */}
+            <div className="absolute top-0 left-1/2 w-px h-full bg-gradient-to-b from-transparent via-orange-500/10 to-transparent" />
+          </div>
+
+          {/* Logo */}
+          <div className="fade-in-up text-center mb-12 relative z-10">
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-700 rounded-2xl flex items-center justify-center shadow-2xl pulse-glow">
+                <Icons.Basketball className="text-white" size={36} />
+              </div>
+            </div>
+            <h1 className="font-display text-7xl md:text-9xl font-black italic uppercase leading-none tracking-tighter text-white" style={{
+              textShadow: '0 0 60px rgba(249,115,22,0.4), 0 4px 0 rgba(0,0,0,0.5)'
+            }}>
+              BASKET
+            </h1>
+            <h2 className="font-display text-4xl md:text-6xl font-black italic uppercase leading-none tracking-tighter" style={{
+              background: 'linear-gradient(135deg, #f97316, #eab308)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>
+              ARENA
+            </h2>
+            <p className="text-slate-500 font-display text-sm uppercase tracking-[0.3em] mt-3 font-bold">
+              Édition Tactique — 3 Joueurs
+            </p>
+          </div>
+
+          {/* Buttons */}
+          <div className="relative z-10 w-full max-w-sm space-y-4">
+            <button
+              onClick={onPlay}
+              className="home-btn w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white py-5 rounded-2xl font-display font-black text-2xl italic uppercase tracking-wider shadow-2xl pulse-glow flex items-center justify-center gap-3 fade-in-up-1"
+            >
+              <Icons.Play />
+              JOUER
+            </button>
+
+            <button
+              onClick={onRules}
+              className="home-btn w-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-500 text-white py-4 rounded-2xl font-display font-black text-xl italic uppercase tracking-wider shadow-xl flex items-center justify-center gap-3 fade-in-up-2"
+            >
+              <Icons.Book />
+              RÈGLES DU JEU
+            </button>
+
+            <button
+              onClick={onCards}
+              className="home-btn w-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-500 text-white py-4 rounded-2xl font-display font-black text-xl italic uppercase tracking-wider shadow-xl flex items-center justify-center gap-3 fade-in-up-3"
+            >
+              <Icons.Cards />
+              TOUTES LES CARTES
+            </button>
+          </div>
+
+          {/* Footer */}
+          <p className="absolute bottom-6 text-slate-700 text-xs font-bold uppercase tracking-widest fade-in-up-4">
+            Premier à 10 points remporte la partie
+          </p>
+        </div>
+      );
+    };
+
+    // ==============================
+    // MODAL WRAPPER (pour règles/cartes depuis le jeu)
+    // ==============================
+    const OverlayModal = ({ onClose, children }) => (
+      <div className="fixed inset-0 z-[900] flex flex-col">
+        <div onClick={onClose} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+        <div className="relative z-10 flex flex-col h-full max-w-4xl w-full mx-auto my-4 md:my-8 rounded-3xl overflow-hidden border border-slate-700 bg-slate-950 shadow-2xl">
+          {children}
+        </div>
+      </div>
+    );
+
+    // ==============================
+    // RULES SCREEN
+    // ==============================
+    const RulesScreen = ({ onBack, backLabel }) => {
+      const [section, setSection] = useState('all');
+
+      const RuleBlock = ({ icon, title, color, borderColor, children }) => (
+        <div className={`rule-section mb-6`} style={{ borderColor }}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xl">{icon}</span>
+            <h3 className={`font-display font-black text-xl italic uppercase`} style={{ color }}>{title}</h3>
+          </div>
+          <div className="text-slate-300 text-sm leading-relaxed space-y-2">
+            {children}
+          </div>
+        </div>
+      );
+
+      const Tag = ({ color = 'orange', children }) => {
+        const colors = {
+          orange: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+          yellow: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+          blue: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+          green: 'bg-green-500/20 text-green-300 border-green-500/30',
+          red: 'bg-red-500/20 text-red-300 border-red-500/30',
+          slate: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
+        };
+        return (
+          <span className={`inline-block px-2 py-0.5 rounded text-xs font-black border ${colors[color]} mr-1`}>
+            {children}
+          </span>
+        );
+      };
+
+      return (
+        <div className="min-h-0 flex flex-col flex-1 overflow-hidden bg-slate-950">
+          {/* Header */}
+          <div className="flex-shrink-0 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-4 py-4">
+            <div className="max-w-3xl mx-auto flex items-center gap-4">
+              <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-bold text-sm">
+                <Icons.ArrowLeft /> {backLabel || 'Retour'}
+              </button>
+              <div className="flex-1 text-center">
+                <h1 className="font-display font-black text-2xl italic uppercase text-white">Règles du Jeu</h1>
+              </div>
+              <div className="w-16" />
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto scrollbar-hide">
+          <div className="max-w-3xl mx-auto p-4 md:p-8 pb-16">
+
+            {/* Objective Banner */}
+            <div className="bg-gradient-to-r from-orange-600/20 to-yellow-500/10 border border-orange-500/30 rounded-2xl p-5 mb-8 text-center">
+              <div className="font-display font-black text-4xl italic text-white mb-1">PREMIER À 10 POINTS</div>
+              <p className="text-orange-300 text-sm font-bold uppercase tracking-widest">= Vainqueur de la partie</p>
+            </div>
+
+            {/* SECTION 1 : Vue d'ensemble */}
+            <RuleBlock icon="🏀" title="Vue d'ensemble" color="#f97316" borderColor="#f97316">
+              <p>
+                Basket Arena est un jeu de cartes tactique pour <strong className="text-white">3 joueurs</strong> (1 humain + 2 IA).
+                Chaque équipe possède un <strong className="text-white">5 majeur</strong> sur le terrain et un <strong className="text-white">banc de 9 cartes</strong>.
+                On joue en rotation : à tour de rôle, une équipe attaque, une défend, et la troisième est en pause.
+              </p>
+            </RuleBlock>
+
+            {/* SECTION 2 : Les cartes */}
+            <RuleBlock icon="🃏" title="Les cartes joueurs" color="#eab308" borderColor="#eab308">
+              <p>Il existe <strong className="text-white">3 types de postes</strong> :</p>
+              <div className="grid grid-cols-3 gap-3 my-3">
+                {[
+                  { poste: 'S', name: 'Small', desc: 'Arrière / Meneur', color: 'blue' },
+                  { poste: 'M', name: 'Medium', desc: 'Ailier', color: 'orange' },
+                  { poste: 'L', name: 'Large', desc: 'Pivot / Ailier fort', color: 'green' },
+                ].map(p => (
+                  <div key={p.poste} className="bg-slate-900 border border-slate-700 rounded-xl p-3 text-center">
+                    <div className="bg-yellow-500 text-black font-black text-xl w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2">{p.poste}</div>
+                    <div className="font-bold text-white text-sm">{p.name}</div>
+                    <div className="text-slate-500 text-xs">{p.desc}</div>
+                  </div>
+                ))}
+              </div>
+              <p>Chaque carte possède une statistique <Tag color="orange">OFF</Tag> (offensive) et <Tag color="blue">DEF</Tag> (défensive).</p>
+            </RuleBlock>
+
+            {/* SECTION 3 : Mise en place */}
+            <RuleBlock icon="⚙️" title="Construire son équipe (Mise en place)" color="#3b82f6" borderColor="#3b82f6">
+              <p className="font-bold text-white">Voici les étapes pour constituer votre 5 majeur avant le match :</p>
+
+              <div className="space-y-3 mt-3">
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="bg-blue-600 text-white font-black text-sm w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">1</div>
+                  <div>
+                    <div className="font-bold text-white text-sm mb-1">Regarder son banc</div>
+                    <div className="text-slate-400 text-sm">En bas de l'écran se trouve votre <strong className="text-white">banc de touche</strong> avec 9 cartes (3 S, 3 M, 3 L). Ce sont vos cartes disponibles au départ.</div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="bg-blue-600 text-white font-black text-sm w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">2</div>
+                  <div>
+                    <div className="font-bold text-white text-sm mb-1">Sélectionner un joueur</div>
+                    <div className="text-slate-400 text-sm"><strong className="text-white">Cliquez sur une carte du banc</strong> pour la sélectionner (elle s'entoure d'un halo bleu). Elle est maintenant "en main".</div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="bg-blue-600 text-white font-black text-sm w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">3</div>
+                  <div>
+                    <div className="font-bold text-white text-sm mb-1">Insérer sur le terrain via les <span className="bg-blue-600 px-1.5 py-0.5 rounded text-white font-black">+</span></div>
+                    <div className="text-slate-400 text-sm">Des boutons <strong className="text-white">+</strong> apparaissent sur la zone de terrain (entre les cartes déjà placées, au début et à la fin). <strong className="text-white">Cliquez sur un + </strong> pour placer votre joueur sélectionné à cet emplacement.</div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="bg-blue-600 text-white font-black text-sm w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">4</div>
+                  <div>
+                    <div className="font-bold text-white text-sm mb-1">Retirer un joueur du terrain</div>
+                    <div className="text-slate-400 text-sm"><strong className="text-white">Cliquez sur un joueur déjà sur le terrain</strong> pour l'enlever et le renvoyer sur le banc. Vous pouvez ainsi ajuster votre composition librement.</div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="bg-blue-600 text-white font-black text-sm w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0">5</div>
+                  <div>
+                    <div className="font-bold text-white text-sm mb-1">Valider quand prêt</div>
+                    <div className="text-slate-400 text-sm">Une fois votre <strong className="text-white">5 majeur complet</strong>, cliquez sur <strong className="text-orange-400">VALIDER MON 5 MAJEUR</strong>. Les contraintes seront vérifiées.</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contraintes */}
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mt-4">
+                <div className="font-black text-yellow-400 text-sm uppercase mb-2">⚠️ Contraintes obligatoires</div>
+                <ul className="space-y-1 text-sm text-slate-300">
+                  <li>• Exactement <strong className="text-white">5 joueurs</strong> sur le terrain</li>
+                  <li>• Au minimum <strong className="text-white">1 S</strong>, <strong className="text-white">1 M</strong> et <strong className="text-white">1 L</strong></li>
+                  <li>• Maximum <strong className="text-white">2 joueurs</strong> du même poste</li>
+                  <li>• Ordre de gauche à droite obligatoire : <Tag color="blue">S</Tag> → <Tag color="orange">M</Tag> → <Tag color="green">L</Tag></li>
+                </ul>
+              </div>
+            </RuleBlock>
+
+            {/* SECTION 4 : Déroulement */}
+            <RuleBlock icon="🎮" title="Déroulement d'un tour" color="#a855f7" borderColor="#a855f7">
+              <p>Le jeu tourne entre 3 rôles : <Tag color="yellow">ATTAQUE</Tag> <Tag color="slate">DÉFENSE</Tag> <Tag color="slate">PAUSE</Tag></p>
+
+              <div className="space-y-3 mt-3">
+                <div className="bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="font-bold text-white text-sm mb-1">🎲 Lancer le dé</div>
+                  <div className="text-slate-400 text-sm">Quand c'est votre tour d'attaque, <strong className="text-white">cliquez sur le ballon</strong> au centre pour lancer le dé (1 à 6).</div>
+                </div>
+
+                <div className="bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="font-bold text-white text-sm mb-1">🎯 Résultat 1–5 : Duel automatique</div>
+                  <div className="text-slate-400 text-sm">Le dé désigne le <strong className="text-white">slot</strong> (position 1 à 5) du défenseur ciblé. Votre joueur au même slot affronte le défenseur correspondant.</div>
+                </div>
+
+                <div className="bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="font-bold text-white text-sm mb-1">⭐ Résultat 6 : Choix libre</div>
+                  <div className="text-slate-400 text-sm"><strong className="text-white">Vous choisissez</strong> quel défenseur cibler. Cliquez sur n'importe quelle carte adverse pour déclencher le duel.</div>
+                </div>
+              </div>
+            </RuleBlock>
+
+            {/* SECTION 5 : Le Duel */}
+            <RuleBlock icon="⚡" title="Le duel" color="#ef4444" borderColor="#ef4444">
+              <p>Le jeu compare l'<Tag color="orange">OFF</Tag> de l'attaquant avec la <Tag color="blue">DEF</Tag> du défenseur.</p>
+              <p className="mt-2">Une probabilité de réussite est calculée : <strong className="text-white">prob = 50% + (OFF − DEF) / 16</strong>, avec un minimum de 5% et un maximum de 95%.</p>
+
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
+                  <div className="text-2xl mb-1">🏀</div>
+                  <div className="font-black text-green-400 text-sm">PANIER !</div>
+                  <div className="text-slate-400 text-xs mt-1">+1 point pour l'attaquant. Le défenseur ciblé est <strong>éliminé</strong> du terrain.</div>
+                </div>
+                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-center">
+                  <div className="text-2xl mb-1">❌</div>
+                  <div className="font-black text-red-400 text-sm">RATÉ</div>
+                  <div className="text-slate-400 text-xs mt-1">Ballon perdu. L'équipe défensive <strong>prend l'attaque</strong>.</div>
+                </div>
+              </div>
+            </RuleBlock>
+
+            {/* SECTION 6 : Remplacement défensif */}
+            <RuleBlock icon="🔄" title="Remplacement après un panier" color="#06b6d4" borderColor="#06b6d4">
+              <p>Quand un panier est marqué, le défenseur ciblé quitte le terrain :</p>
+
+              <div className="space-y-3 mt-3">
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="text-xl flex-shrink-0">📤</div>
+                  <div className="text-slate-400 text-sm">Le joueur éliminé retourne dans la <strong className="text-white">pioche</strong> de son poste (S, M ou L). Il pourra revenir en jeu plus tard comme carte de remplacement.</div>
+                </div>
+
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="text-xl flex-shrink-0">⏳</div>
+                  <div className="text-slate-400 text-sm"><strong className="text-white">Attention !</strong> La nouvelle carte de remplacement (piochée depuis la pioche) <strong className="text-white">n'arrive sur votre banc qu'après avoir inséré un remplaçant</strong> dans votre 5 majeur. Elle ne se montre pas avant.</div>
+                </div>
+
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="text-xl flex-shrink-0">✅</div>
+                  <div className="text-slate-400 text-sm">L'équipe défensive doit <strong className="text-white">immédiatement remplacer</strong> le joueur sortant : cliquez sur une carte du banc, puis sur un <strong className="text-white">+</strong> pour l'insérer sur le terrain.</div>
+                </div>
+              </div>
+            </RuleBlock>
+
+            {/* SECTION 7 : Remplacement volontaire */}
+            <RuleBlock icon="🔃" title="Remplacement volontaire (attaquant)" color="#8b5cf6" borderColor="#8b5cf6">
+              <p>Après avoir marqué un panier, l'attaquant peut <strong className="text-white">choisir de faire un remplacement</strong> avant son prochain tour :</p>
+
+              <div className="space-y-3 mt-3">
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="bg-slate-700 rounded-lg px-2 py-1 font-black text-sm text-white flex-shrink-0">1</div>
+                  <div className="text-slate-400 text-sm">Cliquez sur <strong className="text-white">🔄 Remplacer</strong> quand le bouton apparaît après un panier.</div>
+                </div>
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="bg-slate-700 rounded-lg px-2 py-1 font-black text-sm text-white flex-shrink-0">2</div>
+                  <div className="text-slate-400 text-sm"><strong className="text-white">Cliquez sur le joueur à sortir</strong> de votre 5 majeur (il revient sur le banc).</div>
+                </div>
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="bg-slate-700 rounded-lg px-2 py-1 font-black text-sm text-white flex-shrink-0">3</div>
+                  <div className="text-slate-400 text-sm"><strong className="text-white">Cliquez sur le joueur à faire entrer</strong> depuis le banc (il se sélectionne).</div>
+                </div>
+                <div className="flex gap-3 bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+                  <div className="bg-slate-700 rounded-lg px-2 py-1 font-black text-sm text-white flex-shrink-0">4</div>
+                  <div className="text-slate-400 text-sm"><strong className="text-white">Cliquez sur un +</strong> sur le terrain pour insérer le nouveau joueur à la position souhaitée. Les contraintes d'équipe restent obligatoires.</div>
+                </div>
+              </div>
+            </RuleBlock>
+
+            {/* SECTION 8 : Rotation */}
+            <RuleBlock icon="🔁" title="Rotation des rôles (3 joueurs)" color="#10b981" borderColor="#10b981">
+              <p>Les rôles tournent à chaque panier marqué :</p>
+              <div className="bg-slate-900/60 rounded-xl p-4 mt-3 border border-slate-800">
+                <div className="flex items-center justify-center gap-4 flex-wrap">
+                  <div className="text-center">
+                    <div className="bg-yellow-500 text-black font-black text-xs px-3 py-1 rounded-full mb-1">ATTAQUE</div>
+                    <div className="text-slate-300 text-xs">Reste attaquant<br/>tant qu'il marque</div>
+                  </div>
+                  <div className="text-slate-500 font-black text-2xl">→</div>
+                  <div className="text-center">
+                    <div className="bg-slate-500 text-white font-black text-xs px-3 py-1 rounded-full mb-1">DÉFENSE</div>
+                    <div className="text-slate-300 text-xs">Si panier encaissé :<br/>passe en PAUSE</div>
+                  </div>
+                  <div className="text-slate-500 font-black text-2xl">→</div>
+                  <div className="text-center">
+                    <div className="bg-blue-700 text-white font-black text-xs px-3 py-1 rounded-full mb-1">PAUSE</div>
+                    <div className="text-slate-300 text-xs">Devient la<br/>nouvelle DÉFENSE</div>
+                  </div>
+                </div>
+                <div className="mt-4 text-slate-400 text-xs text-center">Si le tir est <strong className="text-red-400">raté</strong>, le défenseur devient l'attaquant et les rôles s'inversent.</div>
+              </div>
+            </RuleBlock>
+
+            {/* SECTION 9 : IA */}
+            <RuleBlock icon="🤖" title="L'Intelligence Artificielle" color="#94a3b8" borderColor="#94a3b8">
+              <p>Les 2 équipes IA jouent <strong className="text-white">automatiquement</strong> : elles choisissent leurs remplaçants en maximisant la somme OFF+DEF tout en respectant les contraintes d'équipe.</p>
+            </RuleBlock>
+
+            {/* Back button */}
+            <button onClick={onBack} className="w-full mt-4 py-4 bg-slate-800 hover:bg-slate-700 rounded-2xl font-display font-black text-lg italic uppercase text-white flex items-center justify-center gap-2 transition-all">
+              <Icons.ArrowLeft /> {backLabel || 'Retour au menu'}
+            </button>
+          </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ==============================
+    // CARDS GALLERY SCREEN
+    // ==============================
+    const CardsScreen = ({ allPlayers, onBack, backLabel }) => {
+      const [selectedTeam, setSelectedTeam] = useState(null);
+
+      const teams = [...new Set(allPlayers.map(p => String(p.TEAM_y || p.TEAM_x || '').trim()).filter(Boolean))].sort();
+
+      const teamPlayers = selectedTeam
+        ? allPlayers.filter(p => String(p.TEAM_y || p.TEAM_x || '').trim() === selectedTeam)
+        : [];
+
+      const byPoste = (poste) => teamPlayers.filter(p => String(p.Poste || '').trim().toUpperCase() === poste);
+
+      const MiniCard = ({ player }) => (
+        <div
+          style={{ aspectRatio: '800/1117' }}
+          className="relative rounded-lg overflow-hidden bg-slate-800 shadow-xl hover:scale-105 transition-all cursor-default"
+        >
+          <img
+            src={`cartes2/${String(player.TEAM_y || player.TEAM_x || '').trim()}_card_${player.PLAYER_ID}.png`}
+            alt={player.NAME}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `https://via.placeholder.com/400x560/1e293b/ffffff?text=${(player.NAME || '').split(',')[0]}`;
+            }}
+          />
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-2">
+            <p className="font-black text-white text-[10px] md:text-xs truncate uppercase leading-none">{(player.NAME || '').split(',')[0]}</p>
+            <div className="flex justify-between text-[9px] md:text-[10px] font-mono mt-0.5">
+              <span className="text-orange-400 font-bold">O:{player.OFF}</span>
+              <span className="text-blue-400 font-bold">D:{player.DEF}</span>
+            </div>
+          </div>
+          <div className="absolute top-1 right-1 bg-yellow-500 text-black px-1 rounded font-black text-[7px] md:text-[9px]">
+            {player.Poste}
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="min-h-0 flex flex-col flex-1 overflow-hidden bg-slate-950">
+          <div className="flex-shrink-0 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-4 py-4">
+            <div className="max-w-6xl mx-auto flex items-center gap-4">
+              <button onClick={selectedTeam ? () => setSelectedTeam(null) : onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-bold text-sm">
+                <Icons.ArrowLeft /> {selectedTeam ? 'Équipes' : (backLabel || 'Menu')}
+              </button>
+              <div className="flex-1 text-center">
+                <h1 className="font-display font-black text-2xl italic uppercase text-white">
+                  {selectedTeam ? selectedTeam : 'Toutes les Cartes'}
+                </h1>
+                {!selectedTeam && (
+                  <p className="text-slate-500 text-xs font-bold">{allPlayers.length} cartes · {teams.length} équipes</p>
+                )}
+              </div>
+              <div className="w-20" />
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto scrollbar-hide">
+
+          {!selectedTeam ? (
+            // Team selection grid
+            <div className="max-w-6xl mx-auto p-4 md:p-8">
+              <p className="text-slate-500 text-sm text-center mb-6 font-bold">Sélectionnez une équipe pour voir ses cartes</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {teams.map(team => {
+                  const count = allPlayers.filter(p => String(p.TEAM_y || p.TEAM_x || '').trim() === team).length;
+                  return (
+                    <button
+                      key={team}
+                      onClick={() => setSelectedTeam(team)}
+                      className="team-card-btn bg-slate-900 border border-slate-700 hover:border-orange-500/60 rounded-2xl p-4 text-center group"
+                    >
+                      <div className="w-12 h-12 bg-gradient-to-br from-orange-600/20 to-orange-800/20 border border-orange-500/20 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:border-orange-500/50 transition-all">
+                        <Icons.Basketball size={24} className="text-orange-500" />
+                      </div>
+                      <div className="font-display font-black text-sm italic uppercase text-white leading-tight">{team}</div>
+                      <div className="text-slate-500 text-xs font-bold mt-1">{count} cartes</div>
+                      <div className="flex items-center justify-center gap-1 mt-2 text-slate-600 group-hover:text-orange-400 transition-colors">
+                        <Icons.ChevronRight />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            // Cards by poste (3 columns)
+            <div className="max-w-6xl mx-auto p-4 md:p-8">
+              <div className="grid grid-cols-3 gap-6 md:gap-8">
+                {POSTES.map(poste => {
+                  const cards = byPoste(poste);
+                  const posteColors = {
+                    S: { bg: 'from-blue-900/30 to-blue-950/20', border: 'border-blue-500/30', text: 'text-blue-400', badge: 'bg-blue-600' },
+                    M: { bg: 'from-orange-900/30 to-orange-950/20', border: 'border-orange-500/30', text: 'text-orange-400', badge: 'bg-orange-600' },
+                    L: { bg: 'from-green-900/30 to-green-950/20', border: 'border-green-500/30', text: 'text-green-400', badge: 'bg-green-600' },
+                  };
+                  const c = posteColors[poste];
+                  return (
+                    <div key={poste} className={`rounded-2xl bg-gradient-to-b ${c.bg} border ${c.border} overflow-hidden`}>
+                      <div className={`p-3 md:p-4 border-b ${c.border} flex items-center justify-between`}>
+                        <div className={`${c.badge} text-white font-black text-lg md:text-xl w-10 h-10 rounded-xl flex items-center justify-center`}>
+                          {poste}
+                        </div>
+                        <span className={`${c.text} font-black text-sm`}>{cards.length} cartes</span>
+                      </div>
+                      <div className="p-2 md:p-3 space-y-3">
+                        {cards.length === 0 ? (
+                          <div className="text-slate-600 text-xs text-center py-4">Aucune carte</div>
+                        ) : (
+                          cards.map(player => <MiniCard key={player.PLAYER_ID} player={player} />)
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button onClick={() => setSelectedTeam(null)} className="w-full mt-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-2xl font-display font-black text-lg italic uppercase text-white flex items-center justify-center gap-2 transition-all">
+                <Icons.ArrowLeft /> Autres équipes
+              </button>
+            </div>
+          )}
+          </div>
+        </div>
+      );
+    };
+
+    // ==============================
+    // MAIN APP
+    // ==============================
     function App() {
-      const [gameState, setGameState] = useState(GAME_STATES.LOADING);
+      const [appScreen, setAppScreen] = useState('LOADING'); // LOADING, HOME, RULES, CARDS, GAME
+      const [allPlayers, setAllPlayers] = useState([]);
+      const [gameState, setGameState] = useState(GAME_STATES.PREGAME);
       const [phase, setPhase] = useState(PHASES.IDLE);
       const [logs, setLogs] = useState(["Prêt pour le match !"]);
       const [scores, setScores] = useState([0, 0, 0]);
       const [attackerId, setAttackerId] = useState(0);
       const [defenderId, setDefenderId] = useState(1);
       const [pausedId, setPausedId] = useState(2);
-
       const [hands, setHands] = useState([[], [], []]);
       const [lineups, setLineups] = useState([[], [], []]);
       const [decks, setDecks] = useState({ S: [], M: [], L: [] });
-
       const [selectedInHand, setSelectedInHand] = useState(null);
       const [lastRoll, setLastRoll] = useState(null);
       const [targetSlot, setTargetSlot] = useState(null);
       const [shotResult, setShotResult] = useState(null);
       const [pendingDraw, setPendingDraw] = useState(null);
+      const [showStatsModal, setShowStatsModal] = useState(false);
+      const [stats, setStats] = useState([{}, {}, {}]);
+      const [overlay, setOverlay] = useState(null); // 'RULES' | 'CARDS' | null
+
+      const playerKey = (p) => String(p?.PLAYER_ID ?? "");
+
+      const ensurePlayerInStats = (teamId, p) => {
+        if (!p) return;
+        const key = playerKey(p);
+        if (!key) return;
+        setStats(prev => {
+          if (prev[teamId]?.[key]) return prev;
+          const next = [...prev];
+          next[teamId] = { ...(next[teamId] || {}) };
+          next[teamId][key] = { id: key, name: p.NAME || "???", poste: p.Poste || "?", off: p.OFF ?? 0, def: p.DEF ?? 0, used: 1, atkDuels: 0, atkWins: 0, defDuels: 0, defStops: 0 };
+          return next;
+        });
+      };
+
+      const bumpStat = (teamId, p, patchFn) => {
+        if (!p) return;
+        const key = playerKey(p);
+        if (!key) return;
+        setStats(prev => {
+          const next = [...prev];
+          const teamStats = { ...(next[teamId] || {}) };
+          const base = teamStats[key] || { id: key, name: p.NAME || "???", poste: p.Poste || "?", off: p.OFF ?? 0, def: p.DEF ?? 0, used: 1, atkDuels: 0, atkWins: 0, defDuels: 0, defStops: 0 };
+          teamStats[key] = patchFn(base);
+          next[teamId] = teamStats;
+          return next;
+        });
+      };
 
       const addLog = (msg) => setLogs(prev => [msg, ...prev].slice(0, 30));
 
       useEffect(() => {
         const winner = scores.findIndex(s => s >= 10);
         if (winner === -1) return;
-        if (typeof window.confetti !== "function") return;
-        const palette = { 0: ['#3b82f6'], 1: ['#ef4444'], 2: ['#a855f7'] };
-        const colors = palette[winner] || ['#ffffff'];
-        window.confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors });
+        if (typeof window.confetti === "function") {
+          const palette = { 0: ['#f97316'], 1: ['#ef4444'], 2: ['#a855f7'] };
+          window.confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: palette[winner] || ['#ffffff'] });
+        }
+        setShowStatsModal(true);
       }, [scores]);
 
-      // ✅ AUTO-LOAD du CSV au lancement (hébergement statique)
       useEffect(() => {
         const loadAutoCsv = async () => {
           try {
-            addLog(`📥 Chargement auto : ${AUTO_CSV_URL}`);
             const res = await fetch(AUTO_CSV_URL, { cache: "no-store" });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const text = await res.text();
             const players = parsePlayersCsv(text);
-            if (!players.length) throw new Error("CSV vide/invalide");
-            initGame(players);
+            if (!players.length) throw new Error("CSV vide");
+            setAllPlayers(players);
+            setAppScreen('HOME');
           } catch (e) {
-            console.warn("Auto CSV load failed:", e);
-            addLog("⚠ CSV auto introuvable. Importez un CSV manuellement.");
-            // On reste en LOADING => écran upload
-            setGameState(GAME_STATES.LOADING);
+            setAppScreen('LOADING');
           }
         };
         loadAutoCsv();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
 
-      // ✅ Fallback manuel conservé
       const handleManualUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (ev) => {
           const players = parsePlayersCsv(ev.target.result || "");
-          if (!players.length) return addLog("⚠ CSV invalide ou vide.");
-          initGame(players);
+          if (!players.length) return;
+          setAllPlayers(players);
+          setAppScreen('HOME');
         };
         reader.readAsText(file);
       };
 
-      const initGame = (players) => {
+      const startNewGame = () => {
+        const players = allPlayers;
         const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
         const s = shuffle(players.filter(p => p.Poste?.trim().toUpperCase() === 'S'));
         const m = shuffle(players.filter(p => p.Poste?.trim().toUpperCase() === 'M'));
         const l = shuffle(players.filter(p => p.Poste?.trim().toUpperCase() === 'L'));
-        
+
         const newHands = [
-          [...s.splice(0, 3), ...m.splice(0, 3), ...l.splice(0, 3)],
-          [...s.splice(0, 3), ...m.splice(0, 3), ...l.splice(0, 3)],
-          [...s.splice(0, 3), ...m.splice(0, 3), ...l.splice(0, 3)]
+          [...s.splice(0,3), ...m.splice(0,3), ...l.splice(0,3)],
+          [...s.splice(0,3), ...m.splice(0,3), ...l.splice(0,3)],
+          [...s.splice(0,3), ...m.splice(0,3), ...l.splice(0,3)],
         ];
-        
+
         setHands(newHands);
         setDecks({ S: s, M: m, L: l });
+        setLineups([[], [], []]);
+        setScores([0, 0, 0]);
+        setAttackerId(0);
+        setDefenderId(1);
+        setPausedId(2);
+        setPhase(PHASES.IDLE);
+        setLastRoll(null);
+        setTargetSlot(null);
+        setShotResult(null);
+        setPendingDraw(null);
+        setStats([{}, {}, {}]);
+        setShowStatsModal(false);
+        setLogs(["Placez votre 5 majeur !"]);
         setGameState(GAME_STATES.PREGAME);
-        addLog("✅ Joueurs chargés ! Placez votre 5 majeur.");
+        setAppScreen('GAME');
       };
 
+      // ---- GAME LOGIC ----
       const handleLineupClick = (idx) => {
         if (gameState === GAME_STATES.PREGAME || phase === PHASES.REMOVING_ATK) {
           const player = lineups[0][idx];
           const newLineup = [...lineups[0]]; newLineup.splice(idx, 1);
           const newHands = [...hands]; newHands[0] = [...newHands[0], player];
           const newLineups = [...lineups]; newLineups[0] = newLineup;
-          setLineups(newLineups);
-          setHands(newHands);
-          if (phase === PHASES.REMOVING_ATK) {
-            setPhase(PHASES.PLACING_REPLACEMENT);
-            addLog("Joueur sorti. Choisissez un remplaçant.");
-          }
+          setLineups(newLineups); setHands(newHands);
+          if (phase === PHASES.REMOVING_ATK) { setPhase(PHASES.PLACING_REPLACEMENT); addLog("Joueur sorti. Choisissez un remplaçant."); }
         }
       };
 
       const handleInsertion = (idx) => {
         if (selectedInHand === null) return;
         const card = hands[0][selectedInHand];
+        ensurePlayerInStats(0, card);
         const current = lineups[0];
-        
-        if (current.filter(p => p.Poste === card.Poste).length >= 2) {
-          return addLog(`⚠ Impossible : Maximum 2 ${card.Poste} sur le terrain.`);
-        }
-
-        const newLineup = [...current]; 
-        newLineup.splice(idx, 0, card);
-
+        if (current.filter(p => p.Poste === card.Poste).length >= 2) return addLog(`⚠ Max 2 ${card.Poste} sur le terrain.`);
+        const newLineup = [...current]; newLineup.splice(idx, 0, card);
         const orderMap = { 'S': 1, 'M': 2, 'L': 3 };
         for (let i = 0; i < newLineup.length - 1; i++) {
-          if (orderMap[newLineup[i].Poste] > orderMap[newLineup[i+1].Poste]) return addLog("⚠ Ordre S -> M -> L obligatoire !");
+          if (orderMap[newLineup[i].Poste] > orderMap[newLineup[i+1].Poste]) return addLog("⚠ Ordre S → M → L obligatoire !");
         }
-
-        if (phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF) {
-            const hasAll = POSTES.every(pos => newLineup.some(p => p.Poste === pos));
-            if (!hasAll && newLineup.length === 5) {
-                return addLog("⚠ Votre équipe doit contenir au moins un S, un M et un L.");
-            }
+        if ((phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF)) {
+          const hasAll = POSTES.every(pos => newLineup.some(p => p.Poste === pos));
+          if (!hasAll && newLineup.length === 5) return addLog("⚠ Min 1 S, 1 M et 1 L requis.");
         }
-
         const newLineups = [...lineups]; newLineups[0] = newLineup;
-        setLineups(newLineups);
         const newHands = [...hands]; newHands[0] = newHands[0].filter((_, i) => i !== selectedInHand);
-        
         if (pendingDraw && pendingDraw.playerId === 0) {
           const deck = decks[pendingDraw.poste];
-          if (deck.length > 0) {
-            newHands[0].push(deck[0]);
-            setDecks(prev => ({ ...prev, [pendingDraw.poste]: prev[pendingDraw.poste].slice(1) }));
-          }
+          if (deck.length > 0) { newHands[0].push(deck[0]); setDecks(prev => ({ ...prev, [pendingDraw.poste]: prev[pendingDraw.poste].slice(1) })); }
           setPendingDraw(null);
         }
-        setHands(newHands);
-        setSelectedInHand(null);
-
-        if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) {
-          setPhase(PHASES.ATK_SUB_DECISION);
-          addLog("Remplacement effectué.");
-        }
+        setHands(newHands); setLineups(newLineups); setSelectedInHand(null);
+        if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) { setPhase(PHASES.ATK_SUB_DECISION); addLog("Remplacement effectué."); }
       };
 
       const validatePregame = () => {
         if (lineups[0].length !== 5) return addLog("⚠ Il faut 5 joueurs !");
         const hasAll = POSTES.every(pos => lineups[0].some(p => p.Poste === pos));
         if (!hasAll) return addLog("⚠ Min 1 de chaque poste (S, M, L).");
-
-        const newLineups = [...lineups];
-        const newHands = [...hands];
+        const newLineups = [...lineups]; const newHands = [...hands];
         [1, 2].forEach(idx => {
           const h = [...newHands[idx]].sort((a,b) => (b.OFF + b.DEF) - (a.OFF + a.DEF));
           const aiL = [];
           POSTES.forEach(p => { const b = h.find(c => c.Poste === p); if(b) { aiL.push(b); h.splice(h.indexOf(b), 1); } });
-          while(aiL.length < 5) { 
-            const n = h.find(c => aiL.filter(x => x.Poste === c.Poste).length < 2); 
-            if(n) { aiL.push(n); h.splice(h.indexOf(n), 1); } 
-            else break;
-          }
+          while(aiL.length < 5) { const n = h.find(c => aiL.filter(x => x.Poste === c.Poste).length < 2); if(n) { aiL.push(n); h.splice(h.indexOf(n), 1); } else break; }
           const oMap = { 'S': 1, 'M': 2, 'L': 3 };
           aiL.sort((a,b) => oMap[a.Poste] - oMap[b.Poste]);
           newLineups[idx] = aiL; newHands[idx] = h;
         });
-        setLineups(newLineups); setHands(newHands); setGameState(GAME_STATES.PLAYING);
+        setLineups(newLineups); setHands(newHands);
+        setGameState(GAME_STATES.PLAYING);
         setAttackerId(0); setDefenderId(1); setPausedId(2);
+        [0,1,2].forEach(tid => newLineups[tid].forEach(p => ensurePlayerInStats(tid, p)));
         addLog("🏀 Match commencé ! Cible : IA 1.");
       };
 
       const executeDuel = useCallback((slot) => {
-        setTargetSlot(slot);
-        setPhase(PHASES.DUEL);
-        
+        setTargetSlot(slot); setPhase(PHASES.DUEL);
         const atkP = lineups[attackerId][slot];
         const defP = lineups[defenderId][slot];
+        ensurePlayerInStats(attackerId, atkP); ensurePlayerInStats(defenderId, defP);
+        bumpStat(attackerId, atkP, s => ({ ...s, atkDuels: s.atkDuels + 1 }));
+        bumpStat(defenderId, defP, s => ({ ...s, defDuels: s.defDuels + 1 }));
         const prob = Math.min(Math.max(0.5 + (atkP.OFF - defP.DEF) / 16, 0.05), 0.95);
         const win = Math.random() < prob;
-
         setTimeout(() => {
           setShotResult({ success: win, side: attackerId });
           setTimeout(() => {
             setShotResult(null);
             if (win) {
               addLog(`🏀 PANIER ! ${atkP.NAME.split(',')[0]} marque.`);
+              bumpStat(attackerId, atkP, s => ({ ...s, atkWins: s.atkWins + 1 }));
               const newScores = [...scores]; newScores[attackerId]++; setScores(newScores);
               if (newScores[attackerId] >= 10) return setGameState(GAME_STATES.GAMEOVER);
-
               const lost = lineups[defenderId][slot];
               const nLineups = [...lineups]; nLineups[defenderId].splice(slot, 1); setLineups(nLineups);
               setDecks(prev => ({ ...prev, [lost.Poste]: [...prev[lost.Poste], lost] }));
               setPendingDraw({ playerId: defenderId, poste: lost.Poste });
-              
-              setTargetSlot(null);
-              setPhase(PHASES.REPLACING_DEF);
-              
-              const oldDef = defenderId;
-              const oldPause = pausedId;
-              setDefenderId(oldPause);
-              setPausedId(oldDef);
-              addLog(`🔄 Prochaine cible : ${["VOUS", "IA 1", "IA 2"][oldPause]}`);
-
+              setTargetSlot(null); setPhase(PHASES.REPLACING_DEF);
+              const oldDef = defenderId; const oldPause = pausedId;
+              setDefenderId(oldPause); setPausedId(oldDef);
+              addLog(`🔄 Prochaine cible : ${["VOUS","IA 1","IA 2"][oldPause]}`);
             } else {
               addLog(`❌ BLOQUÉ ! Défense de ${defP.NAME.split(',')[0]}.`);
-              const newAtk = defenderId;
-              const newDef = attackerId;
-              setAttackerId(newAtk);
-              setDefenderId(newDef);
+              bumpStat(defenderId, defP, s => ({ ...s, defStops: s.defStops + 1 }));
+              setAttackerId(defenderId); setDefenderId(attackerId);
               setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null);
             }
           }, 1000);
         }, 1200);
-      }, [attackerId, defenderId, pausedId, lineups, scores, decks]);
+      }, [attackerId, defenderId, pausedId, lineups, scores]);
 
       const rollDie = () => {
         if (phase !== PHASES.IDLE || attackerId !== 0) return;
         const roll = Math.floor(Math.random() * 6) + 1;
         setLastRoll(roll); setPhase(PHASES.ROLLING);
         setTimeout(() => {
-          if (roll <= 5) { 
-            executeDuel(roll-1); 
-          }
-          else { setPhase(PHASES.CHOOSING_TARGET); addLog("🎯 CHOIX LIBRE ! Cliquez sur un défenseur."); }
+          if (roll <= 5) executeDuel(roll - 1);
+          else { setPhase(PHASES.CHOOSING_TARGET); addLog("🎯 CHOIX LIBRE !"); }
         }, 1000);
       };
 
       useEffect(() => {
         if (gameState !== GAME_STATES.PLAYING) return;
-
         if (attackerId !== 0 && phase === PHASES.IDLE) {
           const t = setTimeout(() => {
             const roll = Math.floor(Math.random() * 6) + 1;
             setLastRoll(roll); setPhase(PHASES.ROLLING);
             setTimeout(() => {
               let slot = roll <= 5 ? roll - 1 : 0;
-              if (roll === 6) {
-                let bp = -100;
-                lineups[attackerId].forEach((p, i) => {
-                  const pr = p.OFF - lineups[defenderId][i].DEF;
-                  if (pr > bp) { bp = pr; slot = i; }
-                });
-                executeDuel(slot);
-              } else {
-                executeDuel(slot);
-              }
+              if (roll === 6) { let bp = -100; lineups[attackerId].forEach((p, i) => { const pr = p.OFF - lineups[defenderId][i].DEF; if (pr > bp) { bp = pr; slot = i; } }); }
+              executeDuel(slot);
             }, 1000);
           }, 1500);
           return () => clearTimeout(t);
         }
-
         if (phase === PHASES.REPLACING_DEF || phase === PHASES.ATK_SUB_DECISION) {
           const activeReplacing = phase === PHASES.REPLACING_DEF ? pausedId : attackerId;
           if (activeReplacing !== 0) {
@@ -437,7 +1005,6 @@
                     const orderOk = test.every((x, i) => i === 0 || "SML".indexOf(test[i-1].Poste) <= "SML".indexOf(x.Poste));
                     const minOk = POSTES.every(pos => test.some(x => x.Poste === pos));
                     const maxOk = POSTES.every(pos => test.filter(x => x.Poste === pos).length <= 2);
-
                     if (orderOk && minOk && maxOk) {
                       const s = test.reduce((acc, x) => acc + x.OFF + x.DEF, 0);
                       if (s > bs) { bs = s; bc = ci; bp = pi; }
@@ -445,6 +1012,7 @@
                   }
                 });
                 if (bc !== -1) {
+                  ensurePlayerInStats(activeReplacing, h[bc]);
                   const nL = [...l]; nL.splice(bp, 0, h[bc]);
                   const nH = h.filter((_, i) => i !== bc);
                   if (pendingDraw && pendingDraw.playerId === activeReplacing) {
@@ -474,18 +1042,70 @@
       const currentAtkPlayer = (phase === PHASES.DUEL || phase === PHASES.ROLLING) && targetSlot !== null ? lineups[attackerId][targetSlot] : null;
       const currentDefPlayer = (phase === PHASES.DUEL || phase === PHASES.ROLLING) && targetSlot !== null ? lineups[defenderId][targetSlot] : null;
 
+      // ====== SCREEN ROUTING ======
+      if (appScreen === 'LOADING') {
+        return (
+          <div className="home-bg min-h-screen flex flex-col items-center justify-center p-6">
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-orange-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4 pulse-glow">
+                <Icons.Basketball className="text-orange-500" size={40} />
+              </div>
+              <h1 className="font-display text-5xl font-black italic uppercase text-white">BASKET ARENA</h1>
+              <p className="text-slate-500 text-sm mt-2">Chargement des données...</p>
+            </div>
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 max-w-sm w-full text-center">
+              <p className="text-slate-400 text-sm mb-4">
+                Fichier attendu : <span className="font-mono text-slate-200 text-xs">{AUTO_CSV_URL}</span>
+              </p>
+              <label className="bg-orange-600 hover:bg-orange-500 text-white px-6 py-3 rounded-xl font-black cursor-pointer shadow-xl transition-all inline-block text-sm uppercase">
+                Importer CSV <input type="file" accept=".csv" onChange={handleManualUpload} className="hidden" />
+              </label>
+            </div>
+          </div>
+        );
+      }
+
+      if (appScreen === 'HOME') {
+        return <HomeScreen onPlay={startNewGame} onRules={() => setAppScreen('RULES')} onCards={() => setAppScreen('CARDS')} />;
+      }
+
+      if (appScreen === 'RULES') {
+        return <div className="min-h-screen flex flex-col bg-slate-950"><RulesScreen onBack={() => setAppScreen('HOME')} /></div>;
+      }
+
+      if (appScreen === 'CARDS') {
+        return <div className="min-h-screen flex flex-col bg-slate-950"><CardsScreen allPlayers={allPlayers} onBack={() => setAppScreen('HOME')} /></div>;
+      }
+
+      // ====== GAME SCREEN ======
       return (
+        <>
+        {/* Overlays (règles / cartes) depuis le jeu */}
+        {overlay === 'RULES' && (
+          <OverlayModal onClose={() => setOverlay(null)}>
+            <RulesScreen onBack={() => setOverlay(null)} backLabel="Fermer" />
+          </OverlayModal>
+        )}
+        {overlay === 'CARDS' && (
+          <OverlayModal onClose={() => setOverlay(null)}>
+            <CardsScreen allPlayers={allPlayers} onBack={() => setOverlay(null)} backLabel="Fermer" />
+          </OverlayModal>
+        )}
         <div className="min-h-screen p-4 md:p-6 overflow-x-hidden">
-          {/* Elargissement du header */}
           <header className="max-w-[95%] mx-auto flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => setAppScreen('HOME')}
+                className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition-all flex items-center gap-2 text-slate-400 hover:text-white text-sm font-bold"
+              >
+                <Icons.ArrowLeft />
+              </button>
               <div className="bg-orange-600 p-3 rounded-2xl shadow-xl border border-orange-500/50"><Icons.Trophy /></div>
               <div>
-                <h1 className="text-2xl font-black italic uppercase leading-none tracking-tighter text-white">Basket Arena</h1>
+                <h1 className="font-display text-2xl font-black italic uppercase leading-none tracking-tighter text-white">Basket Arena</h1>
                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Édition Tactique 3 Joueurs</p>
               </div>
             </div>
-
             <div className="flex bg-slate-900/80 border border-slate-800 rounded-3xl p-1 items-center shadow-2xl">
               <ScoreBox label="VOUS" score={scores[0]} active={attackerId === 0} isDef={defenderId === 0} />
               <div className="w-px h-8 bg-slate-800 mx-2"></div>
@@ -495,150 +1115,102 @@
             </div>
           </header>
 
-          {/* Elargissement du conteneur principal */}
           <main className="max-w-[95%] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-9 space-y-6">
-              {gameState === GAME_STATES.LOADING ? (
-                <div className="bg-slate-900/50 border-2 border-dashed border-slate-800 rounded-3xl p-16 text-center">
-                  <Icons.Basketball className="mx-auto mb-4 text-slate-700" />
-                  <h2 className="text-xl font-bold mb-4 uppercase">Chargement des données</h2>
-                  <p className="text-slate-400 text-sm mb-6">
-                    Le jeu essaie de charger automatiquement <span className="font-mono text-slate-200">{AUTO_CSV_URL}</span>.
-                    <br />Si ce fichier n'existe pas, importez un CSV.
-                  </p>
-                  <label className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-black cursor-pointer shadow-xl transition-all inline-block">
-                    SÉLECTIONNER CSV <input type="file" accept=".csv" onChange={handleManualUpload} className="hidden" />
-                  </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <AITeamZone teamId={1} label="IA 1" lineup={lineups[1]} isAttacking={attackerId===1} isDefending={defenderId===1} targetSlot={targetSlot} isDuelActive={phase===PHASES.DUEL} onSlotClick={(i) => phase===PHASES.CHOOSING_TARGET && defenderId===1 && executeDuel(i)} />
+                <AITeamZone teamId={2} label="IA 2" lineup={lineups[2]} isAttacking={attackerId===2} isDefending={defenderId===2} targetSlot={targetSlot} isDuelActive={phase===PHASES.DUEL} onSlotClick={(i) => phase===PHASES.CHOOSING_TARGET && defenderId===2 && executeDuel(i)} />
+              </div>
+
+              <div className="bg-slate-900/40 border border-slate-800 rounded-[2.5rem] p-8 min-h-[160px] flex flex-col items-center justify-center relative shadow-inner">
+                {gameState === GAME_STATES.PREGAME ? (
+                  <button onClick={validatePregame} className="bg-orange-600 hover:bg-orange-500 text-white px-12 py-4 rounded-2xl font-display font-black text-lg shadow-2xl transition-all flex items-center gap-2 hover:scale-105 italic uppercase">
+                    VALIDER MON 5 MAJEUR <Icons.Plus />
+                  </button>
+                ) : gameState === GAME_STATES.GAMEOVER ? (
+                  <div className="text-center">
+                    <h2 className="font-display text-4xl font-black italic uppercase mb-4 text-white">Match Terminé</h2>
+                    <div className="flex flex-col md:flex-row gap-3 justify-center">
+                      <button onClick={() => setShowStatsModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-2 rounded-lg font-black uppercase">Résultats & stats</button>
+                      <button onClick={startNewGame} className="bg-white text-black px-8 py-2 rounded-lg font-bold uppercase">REJOUER</button>
+                      <button onClick={() => setAppScreen('HOME')} className="bg-slate-700 text-white px-8 py-2 rounded-lg font-bold uppercase">MENU</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full flex flex-col items-center gap-6">
+                    <div className="flex items-center justify-center gap-4 md:gap-16 w-full max-w-2xl">
+                      <div className="w-24 md:w-32 flex justify-end">
+                        {currentAtkPlayer && (
+                          <div className="animate-pop-stat flex flex-col items-end">
+                            <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-1">ATTAQUE</span>
+                            <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 text-black w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-[0_0_20px_rgba(234,179,8,0.4)] border-2 border-yellow-200/50">{currentAtkPlayer.OFF}</div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="relative z-10">
+                        <button
+                          onClick={rollDie}
+                          disabled={phase !== PHASES.IDLE || attackerId !== 0}
+                          className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center transition-all border-4 shadow-2xl
+                            ${attackerId === 0 && phase === PHASES.IDLE ? 'bg-orange-600 border-orange-400 hover:scale-110 pulse-glow' : 'bg-slate-800 border-slate-700'}`}
+                        >
+                          {lastRoll ? <span className="text-3xl md:text-4xl font-black text-white">{lastRoll}</span> : <Icons.Basketball className={phase === PHASES.ROLLING ? 'animate-roll' : ''} size={36} />}
+                        </button>
+                        {shotResult && (
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                            <div className={`px-4 py-1.5 rounded-full text-white font-black italic uppercase text-xs shadow-2xl ${shotResult.success ? 'bg-green-600' : 'bg-red-600'}`}>
+                              {shotResult.success ? "PANIER !" : "RATÉ"}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="w-24 md:w-32 flex justify-start">
+                        {currentDefPlayer && (
+                          <div className="animate-pop-stat flex flex-col items-start">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">DÉFENSE</span>
+                            <div className="bg-gradient-to-br from-slate-300 to-slate-500 text-black w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-[0_0_20px_rgba(148,163,184,0.4)] border-2 border-slate-100/50">{currentDefPlayer.DEF}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <StatusLine phase={phase} attackerId={attackerId} defenderId={defenderId} onSkip={() => { setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null); }} onSub={() => setPhase(PHASES.REMOVING_ATK)} />
+                  </div>
+                )}
+              </div>
+
+              <div data-team-id={0} className={`p-4 md:p-6 rounded-[2.5rem] border team-zone-transition relative shadow-lg ${getUserBoardStyle()}`}>
+                <div className={`absolute -top-3 left-8 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg
+                  ${attackerId === 0 ? 'bg-yellow-600' : defenderId === 0 ? 'bg-slate-500' : 'bg-blue-600'}`}>
+                  {attackerId === 0 ? "🔥 VOUS ATTAQUEZ" : defenderId === 0 ? "🛡️ VOUS DÉFENDEZ" : "VOUS (EN PAUSE)"}
                 </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <AITeamZone
-                      teamId={1} label="IA 1" lineup={lineups[1]}
-                      isAttacking={attackerId === 1} isDefending={defenderId === 1}
-                      targetSlot={targetSlot} isDuelActive={phase === PHASES.DUEL}
-                      onSlotClick={(i) => phase === PHASES.CHOOSING_TARGET && defenderId === 1 && executeDuel(i)}
-                    />
-                    <AITeamZone
-                      teamId={2} label="IA 2" lineup={lineups[2]}
-                      isAttacking={attackerId === 2} isDefending={defenderId === 2}
-                      targetSlot={targetSlot} isDuelActive={phase === PHASES.DUEL}
-                      onSlotClick={(i) => phase === PHASES.CHOOSING_TARGET && defenderId === 2 && executeDuel(i)}
-                    />
-                  </div>
+                <div className="flex justify-center items-center gap-1.5 md:gap-2 min-h-[140px] md:min-h-[220px] w-full px-2 py-2">
+                  {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF) && <DropZone onClick={() => handleInsertion(0)} />}
+                  {lineups[0].map((p, i) => (
+                    <React.Fragment key={i}>
+                      <PlayerCard player={p}
+                        isTarget={defenderId === 0 && targetSlot === i}
+                        isAttacker={attackerId === 0 && targetSlot === i && (phase === PHASES.ROLLING || phase === PHASES.DUEL)}
+                        isJumping={phase === PHASES.DUEL && targetSlot === i && (attackerId === 0 || defenderId === 0)}
+                        onClick={() => handleLineupClick(i)}
+                        disabled={gameState !== GAME_STATES.PREGAME && phase !== PHASES.REMOVING_ATK} />
+                      {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF) && <DropZone onClick={() => handleInsertion(i + 1)} />}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
 
-                  <div className="bg-slate-900/40 border border-slate-800 rounded-[2.5rem] p-8 min-h-[160px] flex flex-col items-center justify-center relative shadow-inner">
-                    {gameState === GAME_STATES.PREGAME ? (
-                      <button onClick={validatePregame} className="bg-orange-600 hover:bg-orange-500 text-white px-12 py-4 rounded-2xl font-black text-lg shadow-2xl transition-all flex items-center gap-2 hover:scale-105">
-                        VALIDER MON 5 MAJEUR <Icons.Plus />
-                      </button>
-                    ) : gameState === GAME_STATES.GAMEOVER ? (
-                      <div className="text-center">
-                        <h2 className="text-4xl font-black italic uppercase mb-4 text-white">Match Terminé</h2>
-                        <button onClick={() => window.location.reload()} className="bg-white text-black px-8 py-2 rounded-lg font-bold">REJOUER</button>
-                      </div>
-                    ) : (
-                      <div className="w-full flex flex-col items-center gap-6">
-                        <div className="flex items-center justify-center gap-4 md:gap-16 w-full max-w-2xl">
-                          <div className="w-24 md:w-32 flex justify-end">
-                            {currentAtkPlayer && (
-                              <div className="animate-pop-stat flex flex-col items-end">
-                                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-1">ATTAQUE</span>
-                                <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 text-black w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-[0_0_20px_rgba(234,179,8,0.4)] border-2 border-yellow-200/50">
-                                  {currentAtkPlayer.OFF}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="relative z-10">
-                            <button
-                              onClick={rollDie}
-                              disabled={phase !== PHASES.IDLE || attackerId !== 0}
-                              className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center transition-all border-4 shadow-2xl
-                                ${attackerId === 0 && phase === PHASES.IDLE ? 'bg-orange-600 border-orange-400 hover:scale-110' : 'bg-slate-800 border-slate-700'}
-                              `}
-                            >
-                              {lastRoll ? (
-                                <span className="text-3xl md:text-4xl font-black text-white">{lastRoll}</span>
-                              ) : (
-                                <Icons.Basketball className={`${phase === PHASES.ROLLING ? 'animate-roll' : ''}`} />
-                              )}
-                            </button>
-                            {shotResult && (
-                              <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                                <div className={`px-4 py-1.5 rounded-full text-white font-black italic uppercase text-xs shadow-2xl ${shotResult.success ? 'bg-green-600' : 'bg-red-600'}`}>
-                                  {shotResult.success ? "PANIER !" : "RATÉ"}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="w-24 md:w-32 flex justify-start">
-                            {currentDefPlayer && (
-                              <div className="animate-pop-stat flex flex-col items-start">
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">DÉFENSE</span>
-                                <div className="bg-gradient-to-br from-slate-300 to-slate-500 text-black w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-[0_0_20px_rgba(148,163,184,0.4)] border-2 border-slate-100/50">
-                                  {currentDefPlayer.DEF}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <StatusLine
-                          phase={phase}
-                          attackerId={attackerId}
-                          defenderId={defenderId}
-                          onSkip={() => { setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null); }}
-                          onSub={() => setPhase(PHASES.REMOVING_ATK)}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div data-team-id={0}
-                    className={`p-4 md:p-6 rounded-[2.5rem] border team-zone-transition relative shadow-lg ${getUserBoardStyle()}`}>
-                    <div className={`absolute -top-3 left-8 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg
-                      ${attackerId === 0 ? 'bg-yellow-600' : defenderId === 0 ? 'bg-slate-500' : 'bg-blue-600'}
-                    `}>
-                        {attackerId === 0 ? "🔥 VOUS ATTAQUEZ" : defenderId === 0 ? "🛡️ VOUS DÉFENDEZ" : "VOUS (EN PAUSE)"}
-                    </div>
-                    <div className="flex justify-center items-center gap-1.5 md:gap-2 min-h-[140px] md:min-h-[220px] w-full px-2 py-2">
-                      {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF) && <DropZone onClick={() => handleInsertion(0)} />}
-                      {lineups[0].map((p, i) => (
-                        <React.Fragment key={i}>
-                          <PlayerCard player={p}
-                             isTarget={defenderId === 0 && targetSlot === i}
-                             isAttacker={attackerId === 0 && targetSlot === i && (phase === PHASES.ROLLING || phase === PHASES.DUEL)}
-                             isJumping={phase === PHASES.DUEL && targetSlot === i && (attackerId === 0 || defenderId === 0)}
-                             onClick={() => handleLineupClick(i)}
-                             disabled={gameState !== GAME_STATES.PREGAME && phase !== PHASES.REMOVING_ATK} />
-                          {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF) && <DropZone onClick={() => handleInsertion(i + 1)} />}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-900/60 rounded-[2rem] p-4 border border-slate-800 shadow-xl">
-                    <h3 className="text-[11px] font-black uppercase text-slate-500 flex items-center gap-2 mb-4 md:mb-6"><Icons.UserPlus /> Banc de touche</h3>
-                    <div className="flex gap-2 md:gap-4 overflow-x-auto pb-2 scrollbar-hide px-2">
-                      {hands[0].map((p, i) => (
-                        <PlayerCard
-                          key={i} player={p} size="sm"
-                          selected={selectedInHand === i}
-                          onClick={() => {
-                            if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) {
-                              setSelectedInHand(i); setPhase(PHASES.PLACING_REPLACEMENT);
-                            } else {
-                              setSelectedInHand(i === selectedInHand ? null : i);
-                            }
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
+              <div className="bg-slate-900/60 rounded-[2rem] p-4 border border-slate-800 shadow-xl">
+                <h3 className="text-[11px] font-black uppercase text-slate-500 flex items-center gap-2 mb-4 md:mb-6"><Icons.UserPlus /> Banc de touche</h3>
+                <div className="flex gap-2 md:gap-4 overflow-x-auto pb-2 scrollbar-hide px-2">
+                  {hands[0].map((p, i) => (
+                    <PlayerCard key={i} player={p} size="sm" selected={selectedInHand === i}
+                      onClick={() => {
+                        if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) { setSelectedInHand(i); setPhase(PHASES.PLACING_REPLACEMENT); }
+                        else { setSelectedInHand(i === selectedInHand ? null : i); }
+                      }} />
+                  ))}
+                </div>
+              </div>
             </div>
 
             <aside className="lg:col-span-3 flex flex-col gap-6">
@@ -646,91 +1218,36 @@
                 <div className="flex items-center gap-2 mb-4 text-[11px] font-black text-slate-500 uppercase tracking-widest"><Icons.History /> Chronologie</div>
                 <div className="overflow-y-auto flex-1 space-y-2 pr-2 scrollbar-hide">
                   {logs.map((log, i) => (
-                    <div key={i} className={`p-3 rounded-xl text-[10px] font-medium leading-snug ${log.includes('🏀') ? 'bg-orange-500/10 text-orange-400' : 'bg-slate-800/40 text-slate-400'}`}>
-                      {log}
-                    </div>
+                    <div key={i} className={`p-3 rounded-xl text-[10px] font-medium leading-snug ${log.includes('🏀') ? 'bg-orange-500/10 text-orange-400' : 'bg-slate-800/40 text-slate-400'}`}>{log}</div>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-slate-900/50 rounded-3xl p-6 border border-slate-800 flex-1 text-[11px] shadow-xl text-slate-400 leading-relaxed">
-                <h4 className="font-black uppercase text-slate-300 mb-4">Règles du jeu</h4>
-
-                <div className="space-y-3">
-                  <p>
-                    <b className="text-yellow-500">OBJECTIF :</b> Être le premier à atteindre <b>10 points</b>.
-                    Un panier réussi = <b>+1</b>.
-                  </p>
-
-                  <p>
-                    <b className="text-orange-400">MISE EN PLACE :</b> Chaque équipe joue avec <b>5 joueurs</b> sur le terrain.
-                    Avant le début, vous construisez votre <b>5 majeur</b> depuis votre banc.
-                  </p>
-
-                  <p>
-                    <b className="text-blue-400">CONTRAINTES D’ÉQUIPE :</b>
-                    <br />• Toujours <b>5 joueurs</b> sur le terrain
-                    <br />• Minimum <b>1 S</b>, <b>1 M</b>, <b>1 L</b>
-                    <br />• Maximum <b>2</b> joueurs du même poste
-                    <br />• Ordre obligatoire sur le terrain : <b>S → M → L</b>
-                  </p>
-
-                  <p>
-                    <b className="text-slate-200">DÉROULÉ D’UN TOUR (ATTAQUE) :</b>
-                    <br />1) L’attaquant lance le <b>dé</b>.
-                    <br />2) Résultat <b>1–5</b> : duel sur le joueur adverse du même “slot” (position).
-                    <br />3) Résultat <b>6</b> : <b>choix libre</b> — l’attaquant sélectionne le défenseur ciblé.
-                  </p>
-
-                  <p>
-                    <b className="text-slate-200">DUEL :</b> On compare l’<b>OFF</b> de l’attaquant à la <b>DEF</b> du défenseur.
-                    Le jeu calcule une probabilité, puis décide :
-                    <br />• <b>Réussi</b> → panier (+1) et un défenseur est éliminé
-                    <br />• <b>Raté</b> → ballon perdu : l’attaque change de camp
-                  </p>
-
-                  <p>
-                    <b className="text-slate-200">APRÈS UN PANIER :</b>
-                    <br />• Le défenseur ciblé est <b>retiré</b> du terrain
-                    <br />• Il retourne dans la <b>pioche</b> de son poste (S/M/L)
-                    <br />• Le défenseur doit immédiatement <b>remplacer</b> pour revenir à 5 joueurs
-                  </p>
-
-                  <p>
-                    <b className="text-slate-200">REMPLACEMENTS :</b>
-                    <br />• Le joueur qui remplace vient du <b>banc</b>
-                    <br />• Vous choisissez le joueur, puis sa position d’insertion (boutons “+”)
-                    <br />• Les contraintes (S/M/L, max 2, ordre S→M→L) doivent rester valides
-                  </p>
-
-                  <p>
-                    <b className="text-slate-200">ROTATION DES RÔLES (3 JOUEURS) :</b>
-                    Après un panier, les rôles tournent :
-                    <br />• Le défenseur éliminé devient <b>en pause</b>
-                    <br />• L’équipe en pause devient la <b>nouvelle cible</b>
-                    <br />• L’attaquant reste l’attaquant tant qu’il marque
-                  </p>
-
-                  <p>
-                    <b className="text-slate-400">IA :</b> L’IA choisit automatiquement ses remplaçants en privilégiant les options
-                    les plus fortes <b>tout en respectant</b> les contraintes d’équipe.
-                  </p>
-                </div>
-                <button onClick={() => window.location.reload()} className="mt-6 w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-200 font-black uppercase transition-all">
-                  Reset Match
+              <div className="bg-slate-900/50 rounded-3xl p-5 border border-slate-800 flex flex-col gap-3">
+                <h4 className="font-display font-black text-slate-300 italic uppercase text-lg">Navigation</h4>
+                <button onClick={() => setOverlay('RULES')} className="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-200 font-bold text-sm flex items-center justify-center gap-2 transition-all">
+                  <Icons.Book /> Règles du jeu
+                </button>
+                <button onClick={() => setOverlay('CARDS')} className="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-200 font-bold text-sm flex items-center justify-center gap-2 transition-all">
+                  <Icons.Cards /> Voir les cartes
+                </button>
+                <button onClick={() => setAppScreen('HOME')} className="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 font-bold text-sm flex items-center justify-center gap-2 transition-all">
+                  ← Menu principal
                 </button>
               </div>
             </aside>
           </main>
+
+          <StatsModal open={showStatsModal} onClose={() => setShowStatsModal(false)} stats={stats} scores={scores} onReplay={startNewGame} onMenu={() => { setAppScreen('HOME'); setShowStatsModal(false); }} />
         </div>
+        </>
       );
     }
 
-    // --- PETITS COMPOSANTS ---
+    // ---- SMALL COMPONENTS ----
     const ScoreBox = ({ label, score, active, isDef }) => {
-      const activeStyle = active ? 'ring-2 ring-yellow-500 bg-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.3)]' : isDef ? 'ring-2 ring-slate-400 bg-slate-400/20 shadow-[0_0_15px_rgba(148,163,184,0.3)]' : '';
+      const activeStyle = active ? 'ring-2 ring-yellow-500 bg-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.3)]' : isDef ? 'ring-2 ring-slate-400 bg-slate-400/20' : '';
       const colorText = active ? 'text-yellow-400' : isDef ? 'text-slate-200' : 'text-slate-600';
-      
       return (
         <div className={`px-4 md:px-5 py-2 text-center rounded-2xl transition-all duration-500 ${activeStyle}`}>
           <p className="text-[8px] font-black uppercase tracking-widest text-slate-500">{label}</p>
@@ -740,29 +1257,20 @@
     };
 
     const AITeamZone = ({ label, lineup, isAttacking, isDefending, targetSlot, isDuelActive, onSlotClick, teamId }) => {
-      const ring = isAttacking
-        ? 'ring-4 ring-yellow-500 border-yellow-500/50 bg-gradient-to-br from-yellow-900/40 via-yellow-900/20 to-black glow-gold'
-        : isDefending
-          ? 'ring-4 ring-slate-400 border-slate-400/50 bg-gradient-to-br from-slate-700/40 via-slate-800/20 to-black glow-silver'
-          : 'border-slate-800 bg-slate-900/20';
-      
+      const ring = isAttacking ? 'ring-4 ring-yellow-500 border-yellow-500/50 bg-gradient-to-br from-yellow-900/40 via-yellow-900/20 to-black glow-gold'
+        : isDefending ? 'ring-4 ring-slate-400 border-slate-400/50 bg-gradient-to-br from-slate-700/40 via-slate-800/20 to-black glow-silver'
+        : 'border-slate-800 bg-slate-900/20';
       return (
         <div data-team-id={teamId} className={`p-3 md:p-4 rounded-3xl border team-zone-transition relative shadow-lg ${ring} w-full min-w-0`}>
-          <div className={`absolute -top-2.5 left-6 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg uppercase whitespace-nowrap
-            ${isAttacking ? 'bg-yellow-600' : isDefending ? 'bg-slate-500' : 'bg-slate-800'}
-          `}>
+          <div className={`absolute -top-2.5 left-6 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg uppercase whitespace-nowrap ${isAttacking ? 'bg-yellow-600' : isDefending ? 'bg-slate-500' : 'bg-slate-800'}`}>
             {isAttacking ? `🔥 ${label} ATTAQUE` : isDefending ? `🛡️ ${label} DÉFEND` : label}
           </div>
           <div className="flex justify-center items-center gap-1 md:gap-2 min-h-[120px] md:min-h-[220px] w-full py-2">
             {lineup.map((p, i) => (
-              <PlayerCard
-                key={i} player={p} size="sm"
-                isTarget={isDefending && targetSlot === i}
-                isAttacker={isAttacking && targetSlot === i}
+              <PlayerCard key={i} player={p} size="sm"
+                isTarget={isDefending && targetSlot === i} isAttacker={isAttacking && targetSlot === i}
                 isJumping={isDuelActive && targetSlot === i && (isAttacking || isDefending)}
-                canBeTargeted={isDefending && !targetSlot}
-                onClick={() => onSlotClick(i)}
-              />
+                canBeTargeted={isDefending && !targetSlot} onClick={() => onSlotClick(i)} />
             ))}
           </div>
         </div>
@@ -782,17 +1290,140 @@
       let txt = "";
       if (phase === PHASES.REPLACING_DEF) txt = `Un joueur doit être remplacé.`;
       else if (phase === PHASES.REMOVING_ATK) txt = "Choisissez le joueur à sortir.";
-      else if (phase === PHASES.PLACING_REPLACEMENT) txt = "Où insérer le nouveau joueur ? (+) ";
+      else if (phase === PHASES.PLACING_REPLACEMENT) txt = "Où insérer le nouveau joueur ? (+)";
       else if (attackerId === 0) txt = phase === PHASES.CHOOSING_TARGET ? "🎯 CLIQUEZ SUR UNE CARTE ADVERSE !" : `Votre tour ! Cible : ${names[defenderId]}`;
       else txt = `${names[attackerId]} est à l'offensive...`;
       return <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 tracking-widest">{txt}</p>;
     };
 
     const DropZone = ({ onClick }) => (
-      <div onClick={onClick} className="drop-zone group">
-        <Icons.Plus />
-      </div>
+      <div onClick={onClick} className="drop-zone group"><Icons.Plus /></div>
     );
+
+    const StatsModal = ({ open, onClose, stats, scores, onReplay, onMenu }) => {
+      const [step, setStep] = useState("SUMMARY");
+      const [tab, setTab] = useState(0);
+      useEffect(() => { if (!open) return; setStep("SUMMARY"); setTab(0); }, [open]);
+      if (!open) return null;
+
+      const names = ["VOUS", "IA 1", "IA 2"];
+      const safeScores = Array.isArray(scores) ? scores : [0,0,0];
+      const rows = (teamId) => Object.values(stats?.[teamId] || {}).sort((a,b) => ((b.atkWins*2 + b.defStops) - (a.atkWins*2 + a.defStops)));
+      const pct = (wins, duels) => duels > 0 ? Math.round((wins / duels) * 100) : 0;
+      const totals = (teamId) => rows(teamId).reduce((acc, x) => ({ players: acc.players + 1, atkDuels: acc.atkDuels + (x.atkDuels||0), atkWins: acc.atkWins + (x.atkWins||0), defDuels: acc.defDuels + (x.defDuels||0), defStops: acc.defStops + (x.defStops||0) }), { players: 0, atkDuels: 0, atkWins: 0, defDuels: 0, defStops: 0 });
+      const teamTotals = [0,1,2].map(tid => totals(tid));
+      const max = Math.max(...safeScores);
+      const winnerId = (() => { const idxs = safeScores.map((s,i)=>({s,i})).filter(x=>x.s===max).map(x=>x.i); return idxs.length !== 1 ? -1 : idxs[0]; })();
+      const winnerLabel = winnerId === -1 ? "ÉGALITÉ !" : `🏆 Vainqueur : ${names[winnerId]}`;
+      const teamBadge = (tid) => tid === winnerId ? 'bg-yellow-500 text-black' : 'bg-slate-700 text-slate-100';
+
+      return (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+          <div onClick={onClose} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative w-full max-w-4xl rounded-3xl border border-slate-700 bg-slate-950 shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+              <div>
+                <h3 className="font-display text-xl font-black italic uppercase text-white">{step === "SUMMARY" ? "Résultats du match" : "Stats du match"}</h3>
+                <p className="text-[11px] text-slate-400 font-bold">{step === "SUMMARY" ? "Score final & stats d'équipe" : "Joueurs utilisés • Offense & Défense"}</p>
+              </div>
+              <div className="flex gap-2">
+                {step === "DETAILS" && <button onClick={() => setStep("SUMMARY")} className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs uppercase">← Résultats</button>}
+                <button onClick={onClose} className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs uppercase">Fermer</button>
+              </div>
+            </div>
+
+            {step === "SUMMARY" ? (
+              <div className="p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                  <span className={`inline-flex px-4 py-2 rounded-2xl border border-slate-800 bg-slate-900/40 font-black text-sm ${winnerId === -1 ? "text-slate-100" : "text-yellow-400"}`}>{winnerLabel}</span>
+                  <div className="flex gap-3 flex-wrap">
+                    <button onClick={() => setStep("DETAILS")} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-xl font-black uppercase text-sm shadow-xl transition-all">Stats joueurs →</button>
+                    {onReplay && <button onClick={onReplay} className="bg-orange-600 hover:bg-orange-500 text-white px-6 py-2 rounded-xl font-black uppercase text-sm shadow-xl transition-all">Rejouer</button>}
+                    {onMenu && <button onClick={onMenu} className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-xl font-black uppercase text-sm transition-all">Menu</button>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  {[0,1,2].map(tid => (
+                    <div key={tid} className="rounded-3xl border border-slate-800 bg-slate-900/30 p-5 shadow-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="text-[11px] font-black uppercase tracking-widest text-slate-400">{names[tid]}</div>
+                        <div className={`px-3 py-1 rounded-xl font-black text-[11px] ${teamBadge(tid)}`}>{winnerId === -1 ? "—" : (tid === winnerId ? "WIN" : "LOSE")}</div>
+                      </div>
+                      <div className="text-5xl font-black text-white">{safeScores[tid] ?? 0}</div>
+                      <div className="mt-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Score final</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-3xl border border-slate-800 bg-slate-900/30 overflow-hidden">
+                  <div className="px-5 py-4 border-b border-slate-800">
+                    <div className="text-[11px] font-black uppercase tracking-widest text-slate-400">Stats d'équipe</div>
+                  </div>
+                  <div className="grid grid-cols-12 gap-0 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800">
+                    <div className="col-span-3">Équipe</div><div className="col-span-3 text-center">Joueurs</div>
+                    <div className="col-span-3 text-center">OFF</div><div className="col-span-3 text-center">DEF</div>
+                  </div>
+                  {[0,1,2].map(tid => {
+                    const t = teamTotals[tid];
+                    return (
+                      <div key={tid} className="grid grid-cols-12 px-5 py-4 text-[11px] border-b border-slate-800/60 hover:bg-slate-800/20">
+                        <div className="col-span-3 flex items-center gap-2">
+                          <span className="font-black text-slate-100">{names[tid]}</span>
+                          {winnerId !== -1 && tid === winnerId && <span className="px-2 py-1 rounded-lg bg-yellow-500 text-black font-black text-[10px]">🏆</span>}
+                        </div>
+                        <div className="col-span-3 flex items-center justify-center"><span className="px-3 py-1 rounded-xl bg-slate-800 text-slate-100 font-black text-[11px]">{t.players}</span></div>
+                        <div className="col-span-3 flex items-center justify-center gap-2"><span className="font-black text-orange-300">{t.atkWins}/{t.atkDuels}</span><span className="text-slate-500 font-bold">({pct(t.atkWins, t.atkDuels)}%)</span></div>
+                        <div className="col-span-3 flex items-center justify-center gap-2"><span className="font-black text-slate-200">{t.defStops}/{t.defDuels}</span><span className="text-slate-500 font-bold">({pct(t.defStops, t.defDuels)}%)</span></div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="px-6 pt-5">
+                  <div className="flex gap-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-1 w-fit">
+                    {[0,1,2].map(team => (
+                      <button key={team} onClick={() => setTab(team)} className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase transition-all ${tab === team ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>{names[team]}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-6 scrollbar-hide">
+                  <div className="rounded-2xl border border-slate-800 bg-slate-900/30 overflow-hidden">
+                    <div className="grid grid-cols-12 gap-0 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800">
+                      <div className="col-span-4">Joueur</div><div className="col-span-2 text-center">Poste</div>
+                      <div className="col-span-3 text-center">OFF</div><div className="col-span-3 text-center">DEF</div>
+                    </div>
+                    {(() => {
+                      const t = totals(tab);
+                      return (
+                        <div className="grid grid-cols-12 px-4 py-3 text-[11px] border-b border-slate-800 bg-slate-950/40">
+                          <div className="col-span-4"><div className="font-black text-slate-100 uppercase">Total équipe</div><div className="text-[10px] text-slate-500 font-bold">{t.players} joueur(s)</div></div>
+                          <div className="col-span-2 flex items-center justify-center"><span className="px-2 py-1 rounded-lg bg-slate-700 text-slate-100 font-black text-[10px]">—</span></div>
+                          <div className="col-span-3 flex items-center justify-center gap-2"><span className="font-black text-orange-300">{t.atkWins}/{t.atkDuels}</span><span className="text-slate-500 font-bold">({pct(t.atkWins, t.atkDuels)}%)</span></div>
+                          <div className="col-span-3 flex items-center justify-center gap-2"><span className="font-black text-slate-200">{t.defStops}/{t.defDuels}</span><span className="text-slate-500 font-bold">({pct(t.defStops, t.defDuels)}%)</span></div>
+                        </div>
+                      );
+                    })()}
+                    <div className="max-h-[55vh] overflow-y-auto scrollbar-hide">
+                      {rows(tab).length === 0 ? (
+                        <div className="p-6 text-slate-400 text-sm">Aucune stat.</div>
+                      ) : rows(tab).map(r => (
+                        <div key={r.id} className="grid grid-cols-12 px-4 py-3 text-[11px] border-b border-slate-800/60 hover:bg-slate-800/20">
+                          <div className="col-span-4"><div className="font-black text-slate-100 truncate">{(r.name||"???").split(',')[0]}</div><div className="text-[10px] text-slate-500 font-bold">OFF {r.off} • DEF {r.def}</div></div>
+                          <div className="col-span-2 flex items-center justify-center"><span className="px-2 py-1 rounded-lg bg-yellow-500 text-black font-black text-[10px]">{r.poste}</span></div>
+                          <div className="col-span-3 flex items-center justify-center gap-2"><span className="font-black text-orange-300">{r.atkWins}/{r.atkDuels}</span><span className="text-slate-500 font-bold">({pct(r.atkWins, r.atkDuels)}%)</span></div>
+                          <div className="col-span-3 flex items-center justify-center gap-2"><span className="font-black text-slate-200">{r.defStops}/{r.defDuels}</span><span className="text-slate-500 font-bold">({pct(r.defStops, r.defDuels)}%)</span></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      );
+    };
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
