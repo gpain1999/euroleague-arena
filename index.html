@@ -294,7 +294,7 @@
             }}>
               ARENA
             </h2>
-            <p className="text-slate-500 font-display text-sm uppercase tracking-[0.3em] mt-3 font-bold">
+            <p className="text-slate-500 font-display text-lg uppercase tracking-[0.3em] mt-3 font-bold">
               BY GPAIN1999
             </p>
           </div>
@@ -630,10 +630,13 @@
 
       const byPoste = (poste) => teamPlayers.filter(p => String(p.Poste || '').trim().toUpperCase() === poste);
 
+      const [zoomedCard, setZoomedCard] = useState(null);
+
       const MiniCard = ({ player }) => (
         <div
+          onClick={() => setZoomedCard(player)}
           style={{ aspectRatio: '800/1117' }}
-          className="relative rounded-lg overflow-hidden bg-slate-800 shadow-xl hover:scale-105 transition-all cursor-default"
+          className="relative rounded-lg overflow-hidden bg-slate-800 shadow-xl hover:scale-105 hover:shadow-orange-500/20 transition-all cursor-pointer"
         >
           <img
             src={`cartes2/${String(player.TEAM_y || player.TEAM_x || '').trim()}_card_${player.PLAYER_ID}.png`}
@@ -644,16 +647,6 @@
               e.target.src = `https://via.placeholder.com/400x560/1e293b/ffffff?text=${(player.NAME || '').split(',')[0]}`;
             }}
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-2">
-            <p className="font-black text-white text-[10px] md:text-xs truncate uppercase leading-none">{(player.NAME || '').split(',')[0]}</p>
-            <div className="flex justify-between text-[9px] md:text-[10px] font-mono mt-0.5">
-              <span className="text-orange-400 font-bold">O:{player.OFF}</span>
-              <span className="text-blue-400 font-bold">D:{player.DEF}</span>
-            </div>
-          </div>
-          <div className="absolute top-1 right-1 bg-yellow-500 text-black px-1 rounded font-black text-[7px] md:text-[9px]">
-            {player.Poste}
-          </div>
         </div>
       );
 
@@ -723,18 +716,17 @@
                 {POSTES.map(poste => {
                   const cards = byPoste(poste);
                   const posteColors = {
-                    S: { bg: 'from-blue-900/30 to-blue-950/20', border: 'border-blue-500/30', text: 'text-blue-400', badge: 'bg-blue-600' },
-                    M: { bg: 'from-orange-900/30 to-orange-950/20', border: 'border-orange-500/30', text: 'text-orange-400', badge: 'bg-orange-600' },
-                    L: { bg: 'from-green-900/30 to-green-950/20', border: 'border-green-500/30', text: 'text-green-400', badge: 'bg-green-600' },
+                    S: { bg: 'from-red-900/30 to-red-950/20', border: 'border-red-500/30', badge: 'bg-red-600' },
+                    M: { bg: 'from-green-900/30 to-green-950/20', border: 'border-green-500/30', badge: 'bg-green-600' },
+                    L: { bg: 'from-blue-900/30 to-blue-950/20', border: 'border-blue-500/30', badge: 'bg-blue-600' },
                   };
                   const c = posteColors[poste];
                   return (
                     <div key={poste} className={`rounded-2xl bg-gradient-to-b ${c.bg} border ${c.border} overflow-hidden`}>
-                      <div className={`p-3 md:p-4 border-b ${c.border} flex items-center justify-between`}>
+                      <div className={`p-3 md:p-4 border-b ${c.border} flex items-center justify-center`}>
                         <div className={`${c.badge} text-white font-black text-lg md:text-xl w-10 h-10 rounded-xl flex items-center justify-center`}>
                           {poste}
                         </div>
-                        <span className={`${c.text} font-black text-sm`}>{cards.length} cartes</span>
                       </div>
                       <div className="p-2 md:p-3 space-y-3">
                         {cards.length === 0 ? (
@@ -754,6 +746,32 @@
             </div>
           )}
           </div>
+
+          {/* Popup carte zoomée */}
+          {zoomedCard && (
+            <div className="fixed inset-0 z-[999] flex items-center justify-center p-4" onClick={() => setZoomedCard(null)}>
+              <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
+              <div className="relative flex flex-col items-center gap-4" onClick={e => e.stopPropagation()}>
+                <div className="relative rounded-2xl overflow-hidden shadow-2xl" style={{ width: 'min(80vw, 320px)', aspectRatio: '800/1117' }}>
+                  <img
+                    src={`cartes2/${String(zoomedCard.TEAM_y || zoomedCard.TEAM_x || '').trim()}_card_${zoomedCard.PLAYER_ID}.png`}
+                    alt={zoomedCard.NAME}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.onerror = null; e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${(zoomedCard.NAME || '').split(',')[0]}`; }}
+                  />
+                </div>
+                <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-700 rounded-2xl px-5 py-3">
+                  <span className="bg-yellow-500 text-black font-black text-sm px-2 py-0.5 rounded-lg">{zoomedCard.Poste}</span>
+                  <span className="font-display font-black text-white text-lg italic uppercase">{(zoomedCard.NAME || '').split(',')[0]}</span>
+                  <span className="text-orange-400 font-black text-sm">O:{zoomedCard.OFF}</span>
+                  <span className="text-blue-400 font-black text-sm">D:{zoomedCard.DEF}</span>
+                </div>
+                <button onClick={() => setZoomedCard(null)} className="text-slate-400 hover:text-white text-sm font-bold uppercase tracking-widest transition-colors">
+                  ✕ Fermer
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       );
     };
