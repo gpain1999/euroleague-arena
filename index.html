@@ -1184,7 +1184,7 @@
                   {attackerId === 0 ? "🔥 VOUS ATTAQUEZ" : defenderId === 0 ? "🛡️ VOUS DÉFENDEZ" : "VOUS (EN PAUSE)"}
                 </div>
                 <div className="flex justify-center items-center gap-1.5 md:gap-2 min-h-[140px] md:min-h-[220px] w-full px-2 py-2">
-                  {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF) && <DropZone onClick={() => handleInsertion(0)} />}
+                  {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0)) && <DropZone onClick={() => handleInsertion(0)} />}
                   {lineups[0].map((p, i) => (
                     <React.Fragment key={i}>
                       <PlayerCard player={p}
@@ -1193,7 +1193,7 @@
                         isJumping={phase === PHASES.DUEL && targetSlot === i && (attackerId === 0 || defenderId === 0)}
                         onClick={() => handleLineupClick(i)}
                         disabled={gameState !== GAME_STATES.PREGAME && phase !== PHASES.REMOVING_ATK} />
-                      {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || phase === PHASES.REPLACING_DEF) && <DropZone onClick={() => handleInsertion(i + 1)} />}
+                      {(gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0)) && <DropZone onClick={() => handleInsertion(i + 1)} />}
                     </React.Fragment>
                   ))}
                 </div>
@@ -1205,7 +1205,7 @@
                   {hands[0].map((p, i) => (
                     <PlayerCard key={i} player={p} size="sm" selected={selectedInHand === i}
                       onClick={() => {
-                        if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) { setSelectedInHand(i); setPhase(PHASES.PLACING_REPLACEMENT); }
+                        if ((phase === PHASES.REPLACING_DEF && pausedId === 0) || phase === PHASES.PLACING_REPLACEMENT) { setSelectedInHand(i); setPhase(PHASES.PLACING_REPLACEMENT); }
                         else { setSelectedInHand(i === selectedInHand ? null : i); }
                       }} />
                   ))}
