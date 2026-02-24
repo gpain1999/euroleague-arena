@@ -782,6 +782,7 @@
       const [subDoneThisTurn, setSubDoneThisTurn] = useState(false);
       const [showStatsModal, setShowStatsModal] = useState(false);
       const [stats, setStats] = useState([{}, {}, {}]);
+      const [pregameError, setPregameError] = useState(null);
       const [overlay, setOverlay] = useState(null); // 'RULES' | 'CARDS' | null
 
       const playerKey = (p) => String(p?.PLAYER_ID ?? "");
@@ -926,9 +927,11 @@
       };
 
       const validatePregame = () => {
-        if (lineups[0].length !== 5) return addLog("⚠ Il faut 5 joueurs !");
-        const hasAll = POSTES.every(pos => lineups[0].some(p => p.Poste === pos));
-        if (!hasAll) return addLog("⚠ Min 1 de chaque poste (S, M, L).");
+        const count = lineups[0].length;
+        if (count === 0) return setPregameError({ title: "Équipe vide !", body: "Vous n'avez placé aucun joueur sur le terrain. Cliquez sur une carte du banc pour la sélectionner, puis sur un + pour la placer." });
+        if (count < 5) return setPregameError({ title: `Il manque ${5 - count} joueur${5 - count > 1 ? 's' : ''} !`, body: `Votre 5 majeur doit contenir exactement 5 joueurs. Vous en avez ${count} pour l'instant. Sélectionnez des joueurs du banc et placez-les sur le terrain.` });
+        const missingPostes = POSTES.filter(pos => !lineups[0].some(p => p.Poste === pos));
+        if (missingPostes.length > 0) return setPregameError({ title: "Composition invalide !", body: `Il faut au minimum 1 joueur de chaque poste (S, M, L). Poste${missingPostes.length > 1 ? 's' : ''} manquant${missingPostes.length > 1 ? 's' : ''} : ${missingPostes.join(', ')}.` });
         const newLineups = [...lineups]; const newHands = [...hands];
         [1, 2].forEach(idx => {
           const h = [...newHands[idx]].sort((a,b) => (b.OFF + b.DEF) - (a.OFF + a.DEF));
@@ -1326,6 +1329,25 @@
           </main>
 
           <StatsModal open={showStatsModal} onClose={() => setShowStatsModal(false)} stats={stats} scores={scores} onReplay={startNewGame} onMenu={() => { setAppScreen('HOME'); setShowStatsModal(false); }} />
+
+          {pregameError && (
+            <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+              <div onClick={() => setPregameError(null)} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+              <div className="relative bg-slate-900 border border-red-500/40 rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
+                <div className="w-14 h-14 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">⚠️</span>
+                </div>
+                <h3 className="font-display font-black text-2xl italic uppercase text-white mb-3">{pregameError.title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed mb-6">{pregameError.body}</p>
+                <button
+                  onClick={() => setPregameError(null)}
+                  className="w-full py-3 bg-orange-600 hover:bg-orange-500 rounded-xl font-black uppercase text-white transition-all"
+                >
+                  OK, je complète mon équipe
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         </>
       );
