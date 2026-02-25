@@ -989,8 +989,8 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
                 <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-700 rounded-2xl px-5 py-3">
                   <span className="bg-yellow-500 text-black font-black text-sm px-2 py-0.5 rounded-lg">{zoomedCard.Poste}</span>
                   <span className="font-display font-black text-white text-lg italic uppercase">{(zoomedCard.NAME || '').split(',')[0]}</span>
-                  <span className="text-orange-400 font-black text-sm">O:{zoomedCard.OFF}</span>
-                  <span className="text-blue-400 font-black text-sm">D:{zoomedCard.DEF}</span>
+                  <span className="text-orange-400 font-black text-sm">O{zoomedCard.OFF}</span>
+                  <span className="text-blue-400 font-black text-sm">D{zoomedCard.DEF}</span>
                 </div>
                 <button onClick={() => setZoomedCard(null)} className="text-slate-400 hover:text-white text-sm font-bold uppercase tracking-widest transition-colors">
                   ✕ Fermer
