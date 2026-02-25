@@ -1276,7 +1276,7 @@
           // log de démarrage orienté joueur
           if (attacker === 0) addLog(`🏀 Match commencé ! Tu attaques en premier. Victoire à ${targetScore} points.`);
           else addLog(`🏀 Match commencé ! ${names[attacker]} attaque en premier. Victoire à ${targetScore} points.`);
-        }, 1200);
+        }, 3000);
 
         return () => clearTimeout(t);
       }, [showRoleDraw, roleDrawPhase, roleDrawResult, targetScore]);
