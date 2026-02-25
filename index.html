@@ -184,6 +184,7 @@
         </svg>
       ),
     };
+
     const BasketLogo = ({ size = 36, className = "" }) => {
       const [error, setError] = React.useState(false);
 
@@ -202,6 +203,7 @@
         />
       );
     };
+
     const GAME_STATES = { LOADING: 'LOADING', HOME: 'HOME', PREGAME: 'PREGAME', PLAYING: 'PLAYING', GAMEOVER: 'GAMEOVER' };
     const PHASES = {
       IDLE: 'IDLE', ROLLING: 'ROLLING', CHOOSING_TARGET: 'CHOOSING_TARGET',
@@ -262,66 +264,67 @@
       const base = Number(p?.DEF ?? 0);
       return (t && synergyTeams?.has(t)) ? base + 0.5 : base;
     };
-// ==============================
-// AI HELPERS (advanced)
-// ==============================
-const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 
-const probScore = (atkPlayer, atkLineup, defPlayer, defLineup) => {
-  if (!atkPlayer || !defPlayer) return 0.05;
-  const atkSyn = computeSynergyTeams(atkLineup);
-  const defSyn = computeSynergyTeams(defLineup);
-  const atkOff = effectiveOFF(atkPlayer, atkSyn);
-  const defDef = effectiveDEF(defPlayer, defSyn);
-  return clamp(0.5 + (atkOff - defDef) / 18, 0.05, 0.95);
-};
+    // ==============================
+    // AI HELPERS (advanced)
+    // ==============================
+    const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 
-const expectedAttackEV = (atkLineup, defLineup) => {
-  const probs = atkLineup.map((p, i) =>
-    probScore(p, atkLineup, defLineup[i], defLineup)
-  );
-  const sum = probs.reduce((a, b) => a + b, 0);
-  const best = Math.max(...probs);
-  return (sum / 6) + (best / 6);
-};
+    const probScore = (atkPlayer, atkLineup, defPlayer, defLineup) => {
+      if (!atkPlayer || !defPlayer) return 0.05;
+      const atkSyn = computeSynergyTeams(atkLineup);
+      const defSyn = computeSynergyTeams(defLineup);
+      const atkOff = effectiveOFF(atkPlayer, atkSyn);
+      const defDef = effectiveDEF(defPlayer, defSyn);
+      return clamp(0.5 + (atkOff - defDef) / 18, 0.05, 0.95);
+    };
 
-const expectedConcedeEV = (myLineup, oppLineup) =>
-  expectedAttackEV(oppLineup, myLineup);
+    const expectedAttackEV = (atkLineup, defLineup) => {
+      const probs = atkLineup.map((p, i) =>
+        probScore(p, atkLineup, defLineup[i], defLineup)
+      );
+      const sum = probs.reduce((a, b) => a + b, 0);
+      const best = Math.max(...probs);
+      return (sum / 6) + (best / 6);
+    };
 
-const isValidLineup = (lu) => {
-  if (!lu || lu.length !== 5) return false;
-  const cnt = { S: 0, M: 0, L: 0 };
-  for (const p of lu) cnt[p.Poste]++;
+    const expectedConcedeEV = (myLineup, oppLineup) =>
+      expectedAttackEV(oppLineup, myLineup);
 
-  if (!(cnt.S && cnt.M && cnt.L)) return false;
-  if (cnt.S > 2 || cnt.M > 2 || cnt.L > 2) return false;
+    const isValidLineup = (lu) => {
+      if (!lu || lu.length !== 5) return false;
+      const cnt = { S: 0, M: 0, L: 0 };
+      for (const p of lu) cnt[p.Poste]++;
 
-  const order = { S: 1, M: 2, L: 3 };
-  for (let i = 0; i < lu.length - 1; i++) {
-    if (order[lu[i].Poste] > order[lu[i + 1].Poste]) return false;
-  }
-  return true;
-};
+      if (!(cnt.S && cnt.M && cnt.L)) return false;
+      if (cnt.S > 2 || cnt.M > 2 || cnt.L > 2) return false;
 
-const generateInsertions = (base, card) => {
-  const out = [];
-  for (let i = 0; i <= base.length; i++) {
-    const test = [...base];
-    test.splice(i, 0, card);
-    if (test.length === 5 && isValidLineup(test)) {
-      out.push(test);
-    }
-  }
-  return out;
-};
+      const order = { S: 1, M: 2, L: 3 };
+      for (let i = 0; i < lu.length - 1; i++) {
+        if (order[lu[i].Poste] > order[lu[i + 1].Poste]) return false;
+      }
+      return true;
+    };
 
-const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
-  const atk =
-    (expectedAttackEV(my, oppA) + expectedAttackEV(my, oppB)) / 2;
-  const def =
-    (expectedConcedeEV(my, oppA) + expectedConcedeEV(my, oppB)) / 2;
-  return w.off * atk - w.def * def;
-};
+    const generateInsertions = (base, card) => {
+      const out = [];
+      for (let i = 0; i <= base.length; i++) {
+        const test = [...base];
+        test.splice(i, 0, card);
+        if (test.length === 5 && isValidLineup(test)) {
+          out.push(test);
+        }
+      }
+      return out;
+    };
+
+    const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
+      const atk =
+        (expectedAttackEV(my, oppA) + expectedAttackEV(my, oppB)) / 2;
+      const def =
+        (expectedConcedeEV(my, oppA) + expectedConcedeEV(my, oppB)) / 2;
+      return w.off * atk - w.def * def;
+    };
 
     // ==============================
     // PLAYER CARD
@@ -406,9 +409,79 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
     };
 
     // ==============================
+    // SCORE SELECT MODAL (- 8 +)
+    // ==============================
+    const ScoreSelectModal = ({ value, onDec, onInc, onCancel, onConfirm }) => (
+      <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+        <div onClick={onCancel} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+
+        <div className="relative w-full max-w-md rounded-3xl border border-orange-500/30 bg-slate-950 shadow-2xl overflow-hidden">
+          <div className="p-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center mx-auto mb-4">
+              <Icons.Trophy size={28} />
+            </div>
+
+            <h3 className="font-display font-black text-2xl md:text-3xl italic uppercase text-white">
+              Score de victoire
+            </h3>
+            <p className="text-slate-400 text-sm font-bold mt-2">
+              Choisis entre 6 et 10 points
+            </p>
+
+            {/* - 8 + en gros */}
+            <div className="mt-6 flex items-center justify-center gap-6">
+              <button
+                onClick={onDec}
+                className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-700 hover:border-orange-500/60 hover:bg-slate-800 transition-all font-black text-3xl"
+                aria-label="Moins"
+              >
+                -
+              </button>
+
+              <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-orange-500 to-yellow-500 text-black flex items-center justify-center shadow-[0_0_45px_rgba(249,115,22,0.35)] border-4 border-white/20">
+                <span className="font-display font-black italic text-6xl leading-none">
+                  {value}
+                </span>
+              </div>
+
+              <button
+                onClick={onInc}
+                className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-700 hover:border-orange-500/60 hover:bg-slate-800 transition-all font-black text-3xl"
+                aria-label="Plus"
+              >
+                +
+              </button>
+            </div>
+
+            <div className="mt-8 grid grid-cols-2 gap-3">
+              <button
+                onClick={onCancel}
+                className="py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black uppercase text-sm"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={onConfirm}
+                className="py-3 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-black uppercase text-sm shadow-xl"
+              >
+                Confirmer
+              </button>
+            </div>
+          </div>
+
+          <div className="px-6 py-4 border-t border-slate-800 bg-slate-950/60 text-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+              Premier à {value} points gagne
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+
+    // ==============================
     // HOME SCREEN
     // ==============================
-    const HomeScreen = ({ onPlay, onRules, onCards }) => {
+    const HomeScreen = ({ onStartGame, onRules, onCards, targetScore, setTargetScore, showScoreModal, setShowScoreModal }) => {
       return (
         <div className="home-bg min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
           {/* Background decoration */}
@@ -467,7 +540,7 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
           {/* Buttons */}
           <div className="relative z-10 w-full max-w-sm space-y-4">
             <button
-              onClick={onPlay}
+              onClick={() => setShowScoreModal(true)}
               className="home-btn w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white py-5 rounded-2xl font-display font-black text-2xl italic uppercase tracking-wider shadow-2xl pulse-glow flex items-center justify-center gap-3 fade-in-up-1"
             >
               <Icons.Play />
@@ -493,8 +566,18 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
 
           {/* Footer */}
           <p className="absolute bottom-6 text-slate-700 text-xs font-bold uppercase tracking-widest fade-in-up-4">
-            Premier à 10 points remporte la partie
+            Premier à {targetScore} points remporte la partie
           </p>
+
+          {showScoreModal && (
+            <ScoreSelectModal
+              value={targetScore}
+              onDec={() => setTargetScore(v => Math.max(6, v - 1))}
+              onInc={() => setTargetScore(v => Math.min(10, v + 1))}
+              onCancel={() => setShowScoreModal(false)}
+              onConfirm={() => { setShowScoreModal(false); onStartGame(); }}
+            />
+          )}
         </div>
       );
     };
@@ -514,7 +597,7 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
     // ==============================
     // RULES SCREEN
     // ==============================
-    const RulesScreen = ({ onBack, backLabel }) => {
+    const RulesScreen = ({ onBack, backLabel, targetScore = 8 }) => {
       const [section, setSection] = useState('all');
 
       const RuleBlock = ({ icon, title, color, borderColor, children }) => (
@@ -565,8 +648,11 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
 
             {/* Objective Banner */}
             <div className="bg-gradient-to-r from-orange-600/20 to-yellow-500/10 border border-orange-500/30 rounded-2xl p-5 mb-8 text-center">
-              <div className="font-display font-black text-4xl italic text-white mb-1">PREMIER À 10 POINTS</div>
+              <div className="font-display font-black text-4xl italic text-white mb-1">PREMIER À {targetScore} POINTS</div>
               <p className="text-orange-300 text-sm font-bold uppercase tracking-widest">= Vainqueur de la partie</p>
+              <p className="text-slate-400 text-xs font-bold mt-3">
+                ⚙️ Avant le match, tu peux choisir la condition de victoire entre <span className="text-white">6</span> et <span className="text-white">10</span> (par défaut <span className="text-white">8</span>).
+              </p>
             </div>
 
             {/* SECTION 1 : Vue d'ensemble */}
@@ -596,6 +682,7 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
               </div>
               <p>Chaque carte possède une statistique <Tag color="orange">OFF</Tag> (offensive) et <Tag color="blue">DEF</Tag> (défensive).</p>
             </RuleBlock>
+
             {/* SECTION 2 BIS : Synergie / Bonus d'équipe */}
             <RuleBlock icon="🟣" title="Synergie d'équipe (BONUS)" color="#a855f7" borderColor="#a855f7">
               <p>
@@ -625,6 +712,7 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
                 </p>
               </div>
             </RuleBlock>
+
             {/* SECTION 3 : Mise en place */}
             <RuleBlock icon="⚙️" title="Construire son équipe (Mise en place)" color="#3b82f6" borderColor="#3b82f6">
               <p className="font-bold text-white">Voici les étapes pour constituer votre 5 majeur avant le match :</p>
@@ -1029,6 +1117,10 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
       const [pregameError, setPregameError] = useState(null);
       const [overlay, setOverlay] = useState(null); // 'RULES' | 'CARDS' | null
 
+      // ✅ SCORE DE VICTOIRE (6..10) + popup " - 8 + "
+      const [targetScore, setTargetScore] = useState(8);
+      const [showScoreModal, setShowScoreModal] = useState(false);
+
       const playerKey = (p) => String(p?.PLAYER_ID ?? "");
 
       const ensurePlayerInStats = (teamId, p) => {
@@ -1060,15 +1152,16 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
 
       const addLog = (msg) => setLogs(prev => [msg, ...prev].slice(0, 30));
 
+      // ✅ FIN DE PARTIE : dès que quelqu'un atteint targetScore
       useEffect(() => {
-        const winner = scores.findIndex(s => s >= 10);
+        const winner = scores.findIndex(s => s >= targetScore);
         if (winner === -1) return;
         if (typeof window.confetti === "function") {
           const palette = { 0: ['#f97316'], 1: ['#ef4444'], 2: ['#a855f7'] };
           window.confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: palette[winner] || ['#ffffff'] });
         }
         setShowStatsModal(true);
-      }, [scores]);
+      }, [scores, targetScore]);
 
       useEffect(() => {
         const loadAutoCsv = async () => {
@@ -1127,7 +1220,7 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
         setPendingDraw(null);
         setStats([{}, {}, {}]);
         setShowStatsModal(false);
-        setLogs(["Placez votre 5 majeur !"]);
+        setLogs([`Placez votre 5 majeur ! (Victoire à ${targetScore} pts)`]);
         setGameState(GAME_STATES.PREGAME);
         setAppScreen('GAME');
       };
@@ -1190,7 +1283,7 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
         setGameState(GAME_STATES.PLAYING);
         setAttackerId(0); setDefenderId(1); setPausedId(2);
         [0,1,2].forEach(tid => newLineups[tid].forEach(p => ensurePlayerInStats(tid, p)));
-        addLog("🏀 Match commencé ! Cible : IA 1.");
+        addLog(`🏀 Match commencé ! Victoire à ${targetScore} points. Cible : IA 1.`);
       };
 
       const executeDuel = useCallback((slot) => {
@@ -1218,7 +1311,7 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
               addLog(`🏀 PANIER ! ${atkP.NAME.split(',')[0]} marque.`);
               bumpStat(attackerId, atkP, s => ({ ...s, atkWins: s.atkWins + 1 }));
               const newScores = [...scores]; newScores[attackerId]++; setScores(newScores);
-              if (newScores[attackerId] >= 10) return setGameState(GAME_STATES.GAMEOVER);
+              if (newScores[attackerId] >= targetScore) return setGameState(GAME_STATES.GAMEOVER);
               const lost = lineups[defenderId][slot];
               const nLineups = [...lineups]; nLineups[defenderId].splice(slot, 1); setLineups(nLineups);
               setDecks(prev => ({ ...prev, [lost.Poste]: [...prev[lost.Poste], lost] }));
@@ -1235,7 +1328,7 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
             }
           }, 1000);
         }, 1200);
-      }, [attackerId, defenderId, pausedId, lineups, scores]);
+      }, [attackerId, defenderId, pausedId, lineups, scores, targetScore]);
 
       const rollDie = () => {
         if (phase !== PHASES.IDLE || attackerId !== 0) return;
@@ -1255,29 +1348,29 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
             setLastRoll(roll); setPhase(PHASES.ROLLING);
             setTimeout(() => {
               let slot = roll <= 5 ? roll - 1 : 0;
-      if (roll === 6) {
-        const atkL = lineups[attackerId];
-        const defL = lineups[defenderId];
+              if (roll === 6) {
+                const atkL = lineups[attackerId];
+                const defL = lineups[defenderId];
 
-        let bestProb = -1;
-        let candidates = [];
+                let bestProb = -1;
+                let candidates = [];
 
-        atkL.forEach((p, i) => {
-          const pr = probScore(p, atkL, defL[i], defL);
-          if (pr > bestProb + 1e-6) {
-            bestProb = pr;
-            candidates = [i];
-          } else if (Math.abs(pr - bestProb) < 1e-6) {
-            candidates.push(i);
-          }
-        });
+                atkL.forEach((p, i) => {
+                  const pr = probScore(p, atkL, defL[i], defL);
+                  if (pr > bestProb + 1e-6) {
+                    bestProb = pr;
+                    candidates = [i];
+                  } else if (Math.abs(pr - bestProb) < 1e-6) {
+                    candidates.push(i);
+                  }
+                });
 
-        slot = candidates.sort((a, b) => {
-          const A = (defL[a]?.OFF ?? 0) + (defL[a]?.DEF ?? 0);
-          const B = (defL[b]?.OFF ?? 0) + (defL[b]?.DEF ?? 0);
-          return B - A;
-        })[0];
-      }
+                slot = candidates.sort((a, b) => {
+                  const A = (defL[a]?.OFF ?? 0) + (defL[a]?.DEF ?? 0);
+                  const B = (defL[b]?.OFF ?? 0) + (defL[b]?.DEF ?? 0);
+                  return B - A;
+                })[0];
+              }
               executeDuel(slot);
             }, 1000);
           }, 1500);
@@ -1288,49 +1381,49 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
           if (activeReplacing !== 0) {
             const t = setTimeout(() => {
               const h = [...hands[activeReplacing]]; const l = [...lineups[activeReplacing]];
-            if (phase === PHASES.REPLACING_DEF) {
-              const team = activeReplacing;
-              const oppIds = [0, 1, 2].filter(x => x !== team);
-              const oppA = lineups[oppIds[0]];
-              const oppB = lineups[oppIds[1]];
+              if (phase === PHASES.REPLACING_DEF) {
+                const team = activeReplacing;
+                const oppIds = [0, 1, 2].filter(x => x !== team);
+                const oppA = lineups[oppIds[0]];
+                const oppB = lineups[oppIds[1]];
 
-              let best = null;
-              let bestU = -1e9;
+                let best = null;
+                let bestU = -1e9;
 
-              for (let ci = 0; ci < h.length; ci++) {
-                const card = h[ci];
-                if (l.filter(x => x.Poste === card.Poste).length >= 2) continue;
+                for (let ci = 0; ci < h.length; ci++) {
+                  const card = h[ci];
+                  if (l.filter(x => x.Poste === card.Poste).length >= 2) continue;
 
-                const candidates = generateInsertions(l, card);
-                for (const cand of candidates) {
-                  const u = lineupUtility(cand, oppA, oppB, { off: 0.55, def: 0.45 });
-                  if (u > bestU) {
-                    bestU = u;
-                    best = { ci, lineup: cand };
+                  const candidates = generateInsertions(l, card);
+                  for (const cand of candidates) {
+                    const u = lineupUtility(cand, oppA, oppB, { off: 0.55, def: 0.45 });
+                    if (u > bestU) {
+                      bestU = u;
+                      best = { ci, lineup: cand };
+                    }
                   }
                 }
-              }
 
-              if (best) {
-                ensurePlayerInStats(team, h[best.ci]);
-                const newHands = h.filter((_, i) => i !== best.ci);
+                if (best) {
+                  ensurePlayerInStats(team, h[best.ci]);
+                  const newHands = h.filter((_, i) => i !== best.ci);
 
-                if (pendingDraw && pendingDraw.playerId === team) {
-                  const d = decks[pendingDraw.poste];
-                  if (d.length) {
-                    newHands.push(d[0]);
-                    setDecks(v => ({ ...v, [pendingDraw.poste]: v[pendingDraw.poste].slice(1) }));
+                  if (pendingDraw && pendingDraw.playerId === team) {
+                    const d = decks[pendingDraw.poste];
+                    if (d.length) {
+                      newHands.push(d[0]);
+                      setDecks(v => ({ ...v, [pendingDraw.poste]: v[pendingDraw.poste].slice(1) }));
+                    }
+                    setPendingDraw(null);
                   }
-                  setPendingDraw(null);
+
+                  const nl = [...lineups]; nl[team] = best.lineup;
+                  const nh = [...hands]; nh[team] = newHands;
+                  setLineups(nl); setHands(nh);
                 }
 
-                const nl = [...lineups]; nl[team] = best.lineup;
-                const nh = [...hands]; nh[team] = newHands;
-                setLineups(nl); setHands(nh);
-              }
-
-              setPhase(PHASES.ATK_SUB_DECISION);
-            } else {
+                setPhase(PHASES.ATK_SUB_DECISION);
+              } else {
                 setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null);
               }
             }, 1000);
@@ -1375,11 +1468,21 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
       }
 
       if (appScreen === 'HOME') {
-        return <HomeScreen onPlay={startNewGame} onRules={() => setAppScreen('RULES')} onCards={() => setAppScreen('CARDS')} />;
+        return (
+          <HomeScreen
+            onStartGame={startNewGame}
+            onRules={() => setAppScreen('RULES')}
+            onCards={() => setAppScreen('CARDS')}
+            targetScore={targetScore}
+            setTargetScore={setTargetScore}
+            showScoreModal={showScoreModal}
+            setShowScoreModal={setShowScoreModal}
+          />
+        );
       }
 
       if (appScreen === 'RULES') {
-        return <div className="min-h-screen flex flex-col bg-slate-950"><RulesScreen onBack={() => setAppScreen('HOME')} /></div>;
+        return <div className="min-h-screen flex flex-col bg-slate-950"><RulesScreen targetScore={targetScore} onBack={() => setAppScreen('HOME')} /></div>;
       }
 
       if (appScreen === 'CARDS') {
@@ -1392,7 +1495,7 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
         {/* Overlays (règles / cartes) depuis le jeu */}
         {overlay === 'RULES' && (
           <OverlayModal onClose={() => setOverlay(null)}>
-            <RulesScreen onBack={() => setOverlay(null)} backLabel="Fermer" />
+            <RulesScreen targetScore={targetScore} onBack={() => setOverlay(null)} backLabel="Fermer" />
           </OverlayModal>
         )}
         {overlay === 'CARDS' && (
@@ -1409,25 +1512,27 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
               >
                 <Icons.ArrowLeft />
               </button>
-            <div
-              className="
-                p-3
-                rounded-2xl
-                flex items-center justify-center
-                bg-gradient-to-br from-black via-slate-900 to-black
-                border border-orange-500/60
-                shadow-[0_0_30px_rgba(249,115,22,0.45)]
-              "
-            >
-              <BasketLogo
-                size={28}
-                className="object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]"
-              />
-            </div>
+              <div
+                className="
+                  p-3
+                  rounded-2xl
+                  flex items-center justify-center
+                  bg-gradient-to-br from-black via-slate-900 to-black
+                  border border-orange-500/60
+                  shadow-[0_0_30px_rgba(249,115,22,0.45)]
+                "
+              >
+                <BasketLogo
+                  size={28}
+                  className="object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]"
+                />
+              </div>
 
               <div>
                 <h1 className="font-display text-2xl font-black italic uppercase leading-none tracking-tighter text-white">Basket Arena</h1>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Édition Tactique 3 Joueurs</p>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
+                  Édition Tactique 3 Joueurs · Victoire à {targetScore} pts
+                </p>
               </div>
             </div>
             <div className="flex bg-slate-900/80 border border-slate-800 rounded-3xl p-1 items-center shadow-2xl">
@@ -1474,47 +1579,47 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
                         )}
                       </div>
                       <div className="relative z-10">
-                    <button
-                      onClick={rollDie}
-                      disabled={phase !== PHASES.IDLE || attackerId !== 0}
-                      className={`
-                        w-16 h-16 md:w-20 md:h-20
-                        rounded-full
-                        flex items-center justify-center
-                        transition-all duration-300
-                        border-4
-                        shadow-2xl
-                        ${
-                          attackerId === 0 && phase === PHASES.IDLE
-                            ? `
-                              bg-gradient-to-br from-black via-slate-900 to-black
-                              border-orange-500/70
-                              hover:scale-110
-                              shadow-[0_0_30px_rgba(249,115,22,0.45)]
-                            `
-                            : `
-                              bg-slate-900
-                              border-slate-700
-                              opacity-60
-                            `
-                        }
-                      `}
-                    >
-                      {lastRoll ? (
-                        <span className="text-3xl md:text-4xl font-black text-white">
-                          {lastRoll}
-                        </span>
-                      ) : (
-                        <BasketLogo
-                          size={40}
+                        <button
+                          onClick={rollDie}
+                          disabled={phase !== PHASES.IDLE || attackerId !== 0}
                           className={`
-                            object-contain
-                            drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]
-                            ${phase === PHASES.ROLLING ? 'animate-roll' : ''}
+                            w-16 h-16 md:w-20 md:h-20
+                            rounded-full
+                            flex items-center justify-center
+                            transition-all duration-300
+                            border-4
+                            shadow-2xl
+                            ${
+                              attackerId === 0 && phase === PHASES.IDLE
+                                ? `
+                                  bg-gradient-to-br from-black via-slate-900 to-black
+                                  border-orange-500/70
+                                  hover:scale-110
+                                  shadow-[0_0_30px_rgba(249,115,22,0.45)]
+                                `
+                                : `
+                                  bg-slate-900
+                                  border-slate-700
+                                  opacity-60
+                                `
+                            }
                           `}
-                        />
-                      )}
-                    </button>
+                        >
+                          {lastRoll ? (
+                            <span className="text-3xl md:text-4xl font-black text-white">
+                              {lastRoll}
+                            </span>
+                          ) : (
+                            <BasketLogo
+                              size={40}
+                              className={`
+                                object-contain
+                                drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]
+                                ${phase === PHASES.ROLLING ? 'animate-roll' : ''}
+                              `}
+                            />
+                          )}
+                        </button>
                         {shotResult && (
                           <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
                             <div className={`px-4 py-1.5 rounded-full text-white font-black italic uppercase text-xs shadow-2xl ${shotResult.success ? 'bg-green-600' : 'bg-red-600'}`}>
