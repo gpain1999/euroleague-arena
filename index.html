@@ -220,46 +220,194 @@
     };
 
     // ==============================
+    // SYNERGY (BONUS +0.5 OFF/DEF)
+    // ==============================
+    const getTeamName = (p) => String(p?.TEAM_y || p?.TEAM_x || '').trim();
+
+    const computeSynergyTeams = (lineup) => {
+      const counts = {};
+      (lineup || []).forEach(p => {
+        const t = getTeamName(p);
+        if (!t) return;
+        counts[t] = (counts[t] || 0) + 1;
+      });
+      return new Set(Object.entries(counts).filter(([, c]) => c >= 2).map(([t]) => t));
+    };
+
+    const effectiveOFF = (p, synergyTeams) => {
+      const t = getTeamName(p);
+      const base = Number(p?.OFF ?? 0);
+      return (t && synergyTeams?.has(t)) ? base + 0.5 : base;
+    };
+
+    const effectiveDEF = (p, synergyTeams) => {
+      const t = getTeamName(p);
+      const base = Number(p?.DEF ?? 0);
+      return (t && synergyTeams?.has(t)) ? base + 0.5 : base;
+    };
+// ==============================
+// AI HELPERS (advanced)
+// ==============================
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+const probScore = (atkPlayer, atkLineup, defPlayer, defLineup) => {
+  if (!atkPlayer || !defPlayer) return 0.05;
+  const atkSyn = computeSynergyTeams(atkLineup);
+  const defSyn = computeSynergyTeams(defLineup);
+  const atkOff = effectiveOFF(atkPlayer, atkSyn);
+  const defDef = effectiveDEF(defPlayer, defSyn);
+  return clamp(0.5 + (atkOff - defDef) / 18, 0.05, 0.95);
+};
+
+const expectedAttackEV = (atkLineup, defLineup) => {
+  const probs = atkLineup.map((p, i) =>
+    probScore(p, atkLineup, defLineup[i], defLineup)
+  );
+  const sum = probs.reduce((a, b) => a + b, 0);
+  const best = Math.max(...probs);
+  return (sum / 6) + (best / 6);
+};
+
+const expectedConcedeEV = (myLineup, oppLineup) =>
+  expectedAttackEV(oppLineup, myLineup);
+
+const isValidLineup = (lu) => {
+  if (!lu || lu.length !== 5) return false;
+  const cnt = { S: 0, M: 0, L: 0 };
+  for (const p of lu) cnt[p.Poste]++;
+
+  if (!(cnt.S && cnt.M && cnt.L)) return false;
+  if (cnt.S > 2 || cnt.M > 2 || cnt.L > 2) return false;
+
+  const order = { S: 1, M: 2, L: 3 };
+  for (let i = 0; i < lu.length - 1; i++) {
+    if (order[lu[i].Poste] > order[lu[i + 1].Poste]) return false;
+  }
+  return true;
+};
+
+const generateInsertions = (base, card) => {
+  const out = [];
+  for (let i = 0; i <= base.length; i++) {
+    const test = [...base];
+    test.splice(i, 0, card);
+    if (test.length === 5 && isValidLineup(test)) {
+      out.push(test);
+    }
+  }
+  return out;
+};
+
+const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
+  const atk =
+    (expectedAttackEV(my, oppA) + expectedAttackEV(my, oppB)) / 2;
+  const def =
+    (expectedConcedeEV(my, oppA) + expectedConcedeEV(my, oppB)) / 2;
+  return w.off * atk - w.def * def;
+};
+    // ==============================
     // PLAYER CARD
     // ==============================
-    const PlayerCard = ({ player, onClick, selected, disabled, isTarget, isAttacker, isJumping, canBeTargeted, size = "md", grayed = false }) => {
-      if (!player) return null;
-      const cardBaseWidth = "w-[18%]";
-      const maxWidth = size === "sm" ? "max-w-[140px]" : "max-w-[180px]";
-      return (
-        <div
-          onClick={(!disabled || canBeTargeted) && !grayed ? onClick : undefined}
-          style={{ aspectRatio: '800/1117' }}
-          className={`relative rounded-lg md:rounded-xl overflow-hidden shadow-2xl transition-all duration-300 flex-shrink-0
-            ${cardBaseWidth} ${maxWidth} bg-slate-800 card-shadow
-            ${grayed ? 'opacity-30 cursor-not-allowed grayscale' : 'cursor-pointer'}
-            ${selected ? 'ring-2 md:ring-4 ring-blue-500 z-20' : ''}
-            ${isTarget || isAttacker ? 'ring-2 md:ring-4 ring-orange-500 z-30 scale-105' : ''}
-            ${isJumping ? 'animate-bounce' : ''}
-            ${canBeTargeted ? 'ring-2 md:ring-4 ring-yellow-400' : ''}`}
-        >
-          <img
-            src={`cartes2/${String(player.TEAM_y || player.TEAM_x || '').trim()}_card_${player.PLAYER_ID}.png`}
-            alt={player.NAME}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${player.NAME ? player.NAME.split(',')[0] : 'N/A'}`;
-            }}
-          />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/95 to-transparent p-1 md:p-1.5 pt-3 md:pt-4 text-[7px] md:text-[9px] lg:text-[11px]">
-            <p className="font-black truncate uppercase text-white leading-none mb-1">{player.NAME ? player.NAME.split(',')[0] : '???'}</p>
-            <div className="flex justify-between font-mono">
-              <span className="font-bold text-orange-400">O:{player.OFF}</span>
-              <span className="font-bold text-blue-400">D:{player.DEF}</span>
-            </div>
-            <div className="absolute top-1 right-1 bg-yellow-500 text-black px-1 rounded-md font-black text-[6px] md:text-[8px] lg:text-[10px] border border-yellow-600">
-              {player.Poste}
-            </div>
-          </div>
+const PlayerCard = ({
+  player, synergyTeams,
+  onClick, selected, disabled,
+  isTarget, isAttacker, isJumping,
+  canBeTargeted, size="md", grayed=false
+}) => {
+  if (!player) return null;
+
+  const cardBaseWidth = "w-[18%]";
+  const maxWidth = size === "sm" ? "max-w-[140px]" : "max-w-[180px]";
+
+  const teamName = getTeamName(player);
+  const isSynergy = !!teamName && synergyTeams?.has(teamName);
+
+  const offVal = synergyTeams ? effectiveOFF(player, synergyTeams) : (player.OFF ?? 0);
+  const defVal = synergyTeams ? effectiveDEF(player, synergyTeams) : (player.DEF ?? 0);
+
+  return (
+    <div
+      onClick={(!disabled || canBeTargeted) && !grayed ? onClick : undefined}
+      style={{ aspectRatio: "800/1117" }}
+className={`relative rounded-lg md:rounded-xl overflow-hidden shadow-2xl transition-all duration-300 flex-shrink-0
+  ${isSynergy
+    ? 'ring-[3px] ring-violet-500 shadow-[0_0_25px_rgba(139,92,246,0.45)]'
+    : ''}
+      ${cardBaseWidth} ${maxWidth} bg-slate-800 card-shadow
+        ${grayed ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}
+        ${selected ? "ring-2 md:ring-4 ring-blue-500 z-20" : ""}
+        ${isTarget || isAttacker ? "ring-2 md:ring-4 ring-orange-500 z-30 scale-105" : ""}
+        ${isJumping ? "animate-bounce" : ""}
+        ${canBeTargeted ? "ring-2 md:ring-4 ring-yellow-400" : ""}`}
+    >
+      {/* Image */}
+      <img
+        src={`cartes2/${String(player.TEAM_y || player.TEAM_x || "").trim()}_card_${player.PLAYER_ID}.png`}
+        alt={player.NAME}
+        className="w-full h-full object-cover"
+        onError={(e) => {
+          e.target.onerror = null;
+          e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${player.NAME ? player.NAME.split(",")[0] : "N/A"}`;
+        }}
+      />
+
+      {/* Overlay bas (nom/stats) — on ajoute du padding bottom si badge */}
+      <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/95 to-transparent
+                       p-1 md:p-1.5 pt-3 md:pt-4 text-[7px] md:text-[9px] lg:text-[11px]
+                       ${isSynergy ? "pb-8" : "pb-1"}`}>
+        <p className="font-black truncate uppercase text-white leading-none mb-1">
+          {player.NAME ? player.NAME.split(",")[0] : "???"}
+        </p>
+        <div className="flex justify-between font-mono">
+          <span className="font-bold text-orange-400">O:{offVal}</span>
+          <span className="font-bold text-blue-400">D:{defVal}</span>
         </div>
-      );
-    };
+        <div className="absolute top-1 right-1 bg-yellow-500 text-black px-1 rounded-md font-black text-[6px] md:text-[8px] lg:text-[10px] border border-yellow-600">
+          {player.Poste}
+        </div>
+      </div>
+
+      {/* ✅ Badge "sous" la carte (dans la zone basse dédiée), zéro débordement */}
+{isSynergy && (
+  <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-[90%] pointer-events-none">
+    <div className="
+      w-full text-center
+      px-2 py-1
+      rounded-full
+      font-black uppercase tracking-wider
+      text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px]
+      bg-violet-500/90 text-white
+      border border-violet-200/50
+      shadow-[0_0_16px_rgba(139,92,246,0.35)]
+      leading-none
+    ">
+      BONUS +0.5
+    </div>
+  </div>
+)}
+
+{isSynergy && (
+  <div
+    className="
+      absolute bottom-2 left-1/2 -translate-x-1/2
+      w-5 h-5 md:w-6 md:h-6
+      rounded-full
+      bg-violet-500/90
+      flex items-center justify-center
+      text-white
+      text-[10px] md:text-[12px]
+      font-black
+      shadow-[0_0_12px_rgba(139,92,246,0.6)]
+      pointer-events-none
+    "
+    title="Bonus de synergie"
+  >
+    ⚡
+  </div>
+)}
+    </div>
+  );
+};
 
     // ==============================
     // HOME SCREEN
@@ -431,7 +579,35 @@
               </div>
               <p>Chaque carte possède une statistique <Tag color="orange">OFF</Tag> (offensive) et <Tag color="blue">DEF</Tag> (défensive).</p>
             </RuleBlock>
+            {/* SECTION 2 BIS : Synergie / Bonus d'équipe */}
+            <RuleBlock icon="🟣" title="Synergie d'équipe (BONUS)" color="#a855f7" borderColor="#a855f7">
+              <p>
+                Quand vous alignez <strong className="text-white">au moins 2 joueurs de la même équipe</strong> sur le terrain,
+                ces joueurs reçoivent un bonus de synergie :
+                <Tag color="orange">OFF +0.5</Tag>
+                <Tag color="blue">DEF +0.5</Tag>
+              </p>
 
+              <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-800 mt-3 space-y-2">
+                <p className="text-slate-300 text-sm">
+                  ✅ Le bonus s'applique uniquement aux cartes concernées (celles de cette même équipe).
+                </p>
+                <p className="text-slate-300 text-sm">
+                  🔄 La synergie est <strong className="text-white">calculée en temps réel</strong> : elle apparaît/disparaît selon les remplacements.
+                </p>
+                <p className="text-slate-300 text-sm">
+                  🟣 Les cartes boostées sont repérables grâce à un <strong className="text-white">contour violet</strong> et l'icône <strong className="text-white">⚡</strong>.
+                </p>
+              </div>
+
+              <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-4 mt-4">
+                <div className="font-black text-violet-300 text-sm uppercase mb-2">Exemple</div>
+                <p className="text-slate-300 text-sm">
+                  Vous avez 2 joueurs du <strong className="text-white">Barça</strong> sur le terrain → ces 2 joueurs passent à
+                  <Tag color="orange">OFF +0.5</Tag> et <Tag color="blue">DEF +0.5</Tag>.
+                </p>
+              </div>
+            </RuleBlock>
             {/* SECTION 3 : Mise en place */}
             <RuleBlock icon="⚙️" title="Construire son équipe (Mise en place)" color="#3b82f6" borderColor="#3b82f6">
               <p className="font-bold text-white">Voici les étapes pour constituer votre 5 majeur avant le match :</p>
@@ -515,7 +691,7 @@
             {/* SECTION 5 : Le Duel */}
             <RuleBlock icon="⚡" title="Le duel" color="#ef4444" borderColor="#ef4444">
               <p>Le jeu compare l'<Tag color="orange">OFF</Tag> de l'attaquant avec la <Tag color="blue">DEF</Tag> du défenseur.</p>
-              <p className="mt-2">Une probabilité de réussite est calculée : <strong className="text-white">prob = 50% + (OFF − DEF) / 16</strong>, avec un minimum de 5% et un maximum de 95%.</p>
+              <p className="mt-2">Une probabilité de réussite est calculée : <strong className="text-white">prob = 50% + (OFF − DEF) / 18</strong>, avec un minimum de 5% et un maximum de 95%.</p>
 
               <div className="grid grid-cols-2 gap-3 mt-3">
                 <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 text-center">
@@ -603,7 +779,40 @@
 
             {/* SECTION 9 : IA */}
             <RuleBlock icon="🤖" title="L'Intelligence Artificielle" color="#94a3b8" borderColor="#94a3b8">
-              <p>Les 2 équipes IA jouent <strong className="text-white">automatiquement</strong> : elles choisissent leurs remplaçants en maximisant la somme OFF+DEF tout en respectant les contraintes d'équipe.</p>
+              <p>
+                Les <strong className="text-white">2 équipes IA</strong> jouent de manière entièrement automatique,
+                en prenant des décisions tactiques avancées.
+              </p>
+
+              <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-800 mt-3 space-y-2">
+                <p className="text-slate-300 text-sm">
+                  🎯 En attaque, l’IA cherche à <strong className="text-white">maximiser ses chances réelles de marquer</strong>
+                  en tenant compte des statistiques <Tag color="orange">OFF</Tag> / <Tag color="blue">DEF</Tag>,
+                  des <strong className="text-white">bonus de synergie</strong> et des probabilités de duel.
+                </p>
+
+                <p className="text-slate-300 text-sm">
+                  ⚡ Sur un <strong className="text-white">jet de dé = 6</strong>, l’IA choisit librement sa cible :
+                  elle privilégie le duel le plus favorable et, à égalité, tente d’<strong className="text-white">éliminer un joueur clé adverse</strong>.
+                </p>
+
+                <p className="text-slate-300 text-sm">
+                  🔄 Lors des remplacements (obligatoires ou volontaires), l’IA évalue plusieurs compositions possibles
+                  et sélectionne celle offrant le <strong className="text-white">meilleur équilibre entre attaque et défense</strong>,
+                  face aux <strong className="text-white">deux autres équipes</strong>.
+                </p>
+
+                <p className="text-slate-300 text-sm">
+                  🟣 L’IA exploite activement les <strong className="text-white">synergies d’équipe</strong> et les bonus associés,
+                  de la même manière qu’un joueur humain averti.
+                </p>
+              </div>
+
+              <div className="bg-slate-800/60 rounded-xl p-3 mt-4 text-center">
+                <p className="text-slate-400 text-xs italic">
+                  L’IA ne triche pas : elle respecte strictement les mêmes règles, contraintes et probabilités que les joueurs humains.
+                </p>
+              </div>
             </RuleBlock>
 
             {/* Back button */}
@@ -974,8 +1183,16 @@
         ensurePlayerInStats(attackerId, atkP); ensurePlayerInStats(defenderId, defP);
         bumpStat(attackerId, atkP, s => ({ ...s, atkDuels: s.atkDuels + 1 }));
         bumpStat(defenderId, defP, s => ({ ...s, defDuels: s.defDuels + 1 }));
-        const prob = Math.min(Math.max(0.5 + (atkP.OFF - defP.DEF) / 16, 0.05), 0.95);
+
+        // SYNERGY applied to duel stats
+        const atkSynergy = computeSynergyTeams(lineups[attackerId]);
+        const defSynergy = computeSynergyTeams(lineups[defenderId]);
+        const atkOff = effectiveOFF(atkP, atkSynergy);
+        const defDef = effectiveDEF(defP, defSynergy);
+
+        const prob = Math.min(Math.max(0.5 + (atkOff - defDef) / 18, 0.05), 0.95);
         const win = Math.random() < prob;
+
         setTimeout(() => {
           setShotResult({ success: win, side: attackerId });
           setTimeout(() => {
@@ -1021,7 +1238,29 @@
             setLastRoll(roll); setPhase(PHASES.ROLLING);
             setTimeout(() => {
               let slot = roll <= 5 ? roll - 1 : 0;
-              if (roll === 6) { let bp = -100; lineups[attackerId].forEach((p, i) => { const pr = p.OFF - lineups[defenderId][i].DEF; if (pr > bp) { bp = pr; slot = i; } }); }
+      if (roll === 6) {
+        const atkL = lineups[attackerId];
+        const defL = lineups[defenderId];
+
+        let bestProb = -1;
+        let candidates = [];
+
+        atkL.forEach((p, i) => {
+          const pr = probScore(p, atkL, defL[i], defL);
+          if (pr > bestProb + 1e-6) {
+            bestProb = pr;
+            candidates = [i];
+          } else if (Math.abs(pr - bestProb) < 1e-6) {
+            candidates.push(i);
+          }
+        });
+
+        slot = candidates.sort((a, b) => {
+          const A = (defL[a]?.OFF ?? 0) + (defL[a]?.DEF ?? 0);
+          const B = (defL[b]?.OFF ?? 0) + (defL[b]?.DEF ?? 0);
+          return B - A;
+        })[0];
+      }
               executeDuel(slot);
             }, 1000);
           }, 1500);
@@ -1032,34 +1271,49 @@
           if (activeReplacing !== 0) {
             const t = setTimeout(() => {
               const h = [...hands[activeReplacing]]; const l = [...lineups[activeReplacing]];
-              if (phase === PHASES.REPLACING_DEF) {
-                let bc = -1, bp = -1, bs = -1;
-                h.forEach((card, ci) => {
-                  for (let pi = 0; pi <= l.length; pi++) {
-                    const test = [...l]; test.splice(pi, 0, card);
-                    const orderOk = test.every((x, i) => i === 0 || "SML".indexOf(test[i-1].Poste) <= "SML".indexOf(x.Poste));
-                    const minOk = POSTES.every(pos => test.some(x => x.Poste === pos));
-                    const maxOk = POSTES.every(pos => test.filter(x => x.Poste === pos).length <= 2);
-                    if (orderOk && minOk && maxOk) {
-                      const s = test.reduce((acc, x) => acc + x.OFF + x.DEF, 0);
-                      if (s > bs) { bs = s; bc = ci; bp = pi; }
-                    }
+            if (phase === PHASES.REPLACING_DEF) {
+              const team = activeReplacing;
+              const oppIds = [0, 1, 2].filter(x => x !== team);
+              const oppA = lineups[oppIds[0]];
+              const oppB = lineups[oppIds[1]];
+
+              let best = null;
+              let bestU = -1e9;
+
+              for (let ci = 0; ci < h.length; ci++) {
+                const card = h[ci];
+                if (l.filter(x => x.Poste === card.Poste).length >= 2) continue;
+
+                const candidates = generateInsertions(l, card);
+                for (const cand of candidates) {
+                  const u = lineupUtility(cand, oppA, oppB, { off: 0.55, def: 0.45 });
+                  if (u > bestU) {
+                    bestU = u;
+                    best = { ci, lineup: cand };
                   }
-                });
-                if (bc !== -1) {
-                  ensurePlayerInStats(activeReplacing, h[bc]);
-                  const nL = [...l]; nL.splice(bp, 0, h[bc]);
-                  const nH = h.filter((_, i) => i !== bc);
-                  if (pendingDraw && pendingDraw.playerId === activeReplacing) {
-                    const d = decks[pendingDraw.poste];
-                    if (d.length > 0) { nH.push(d[0]); setDecks(v => ({...v, [pendingDraw.poste]: v[pendingDraw.poste].slice(1)})); }
-                    setPendingDraw(null);
-                  }
-                  const nLineups = [...lineups]; nLineups[activeReplacing] = nL;
-                  const nHands = [...hands]; nHands[activeReplacing] = nH;
-                  setLineups(nLineups); setHands(nHands); setPhase(PHASES.ATK_SUB_DECISION);
                 }
-              } else {
+              }
+
+              if (best) {
+                ensurePlayerInStats(team, h[best.ci]);
+                const newHands = h.filter((_, i) => i !== best.ci);
+
+                if (pendingDraw && pendingDraw.playerId === team) {
+                  const d = decks[pendingDraw.poste];
+                  if (d.length) {
+                    newHands.push(d[0]);
+                    setDecks(v => ({ ...v, [pendingDraw.poste]: v[pendingDraw.poste].slice(1) }));
+                  }
+                  setPendingDraw(null);
+                }
+
+                const nl = [...lineups]; nl[team] = best.lineup;
+                const nh = [...hands]; nh[team] = newHands;
+                setLineups(nl); setHands(nh);
+              }
+
+              setPhase(PHASES.ATK_SUB_DECISION);
+            } else {
                 setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null);
               }
             }, 1000);
@@ -1076,6 +1330,9 @@
 
       const currentAtkPlayer = (phase === PHASES.DUEL || phase === PHASES.ROLLING) && targetSlot !== null ? lineups[attackerId][targetSlot] : null;
       const currentDefPlayer = (phase === PHASES.DUEL || phase === PHASES.ROLLING) && targetSlot !== null ? lineups[defenderId][targetSlot] : null;
+
+      const currentAtkSynergy = computeSynergyTeams(lineups[attackerId]);
+      const currentDefSynergy = computeSynergyTeams(lineups[defenderId]);
 
       // ====== SCREEN ROUTING ======
       if (appScreen === 'LOADING') {
@@ -1178,7 +1435,9 @@
                         {currentAtkPlayer && (
                           <div className="animate-pop-stat flex flex-col items-end">
                             <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-1">ATTAQUE</span>
-                            <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 text-black w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-[0_0_20px_rgba(234,179,8,0.4)] border-2 border-yellow-200/50">{currentAtkPlayer.OFF}</div>
+                            <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 text-black w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-[0_0_20px_rgba(234,179,8,0.4)] border-2 border-yellow-200/50">
+                              {effectiveOFF(currentAtkPlayer, currentAtkSynergy)}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1203,7 +1462,9 @@
                         {currentDefPlayer && (
                           <div className="animate-pop-stat flex flex-col items-start">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">DÉFENSE</span>
-                            <div className="bg-gradient-to-br from-slate-300 to-slate-500 text-black w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-[0_0_20px_rgba(148,163,184,0.4)] border-2 border-slate-100/50">{currentDefPlayer.DEF}</div>
+                            <div className="bg-gradient-to-br from-slate-300 to-slate-500 text-black w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-[0_0_20px_rgba(148,163,184,0.4)] border-2 border-slate-100/50">
+                              {effectiveDEF(currentDefPlayer, currentDefSynergy)}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1218,6 +1479,7 @@
                   ${attackerId === 0 ? 'bg-yellow-600' : defenderId === 0 ? 'bg-slate-500' : 'bg-blue-600'}`}>
                   {attackerId === 0 ? "🔥 VOUS ATTAQUEZ" : defenderId === 0 ? "🛡️ VOUS DÉFENDEZ" : "VOUS (EN PAUSE)"}
                 </div>
+
                 <div className="flex justify-center items-center gap-1.5 md:gap-2 min-h-[140px] md:min-h-[220px] w-full px-2 py-2">
                   {(() => {
                     const showZones = gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0);
@@ -1235,32 +1497,39 @@
                     };
                     return canInsertAt(0) ? <DropZone onClick={() => handleInsertion(0)} /> : null;
                   })()}
-                  {lineups[0].map((p, i) => (
-                    <React.Fragment key={i}>
-                      <PlayerCard player={p}
-                        isTarget={defenderId === 0 && targetSlot === i}
-                        isAttacker={attackerId === 0 && targetSlot === i && (phase === PHASES.ROLLING || phase === PHASES.DUEL)}
-                        isJumping={phase === PHASES.DUEL && targetSlot === i && (attackerId === 0 || defenderId === 0)}
-                        onClick={() => handleLineupClick(i)}
-                        disabled={gameState !== GAME_STATES.PREGAME && phase !== PHASES.REMOVING_ATK} />
-                      {(() => {
-                        const showZones = gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0);
-                        const canInsertAt = (insertIdx) => {
-                          if (!showZones) return false;
-                          if (selectedInHand === null) return false;
-                          const card = hands[0][selectedInHand];
-                          const orderMap = { 'S': 1, 'M': 2, 'L': 3 };
-                          const test = [...lineups[0]];
-                          test.splice(insertIdx, 0, card);
-                          for (let k = 0; k < test.length - 1; k++) {
-                            if (orderMap[test[k].Poste] > orderMap[test[k+1].Poste]) return false;
-                          }
-                          return true;
-                        };
-                        return canInsertAt(i + 1) ? <DropZone onClick={() => handleInsertion(i + 1)} /> : null;
-                      })()}
-                    </React.Fragment>
-                  ))}
+
+                  {(() => {
+                    const userSynergy = computeSynergyTeams(lineups[0]);
+                    return lineups[0].map((p, i) => (
+                      <React.Fragment key={i}>
+                        <PlayerCard
+                          player={p}
+                          synergyTeams={userSynergy}
+                          isTarget={defenderId === 0 && targetSlot === i}
+                          isAttacker={attackerId === 0 && targetSlot === i && (phase === PHASES.ROLLING || phase === PHASES.DUEL)}
+                          isJumping={phase === PHASES.DUEL && targetSlot === i && (attackerId === 0 || defenderId === 0)}
+                          onClick={() => handleLineupClick(i)}
+                          disabled={gameState !== GAME_STATES.PREGAME && phase !== PHASES.REMOVING_ATK}
+                        />
+                        {(() => {
+                          const showZones = gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0);
+                          const canInsertAt = (insertIdx) => {
+                            if (!showZones) return false;
+                            if (selectedInHand === null) return false;
+                            const card = hands[0][selectedInHand];
+                            const orderMap = { 'S': 1, 'M': 2, 'L': 3 };
+                            const test = [...lineups[0]];
+                            test.splice(insertIdx, 0, card);
+                            for (let k = 0; k < test.length - 1; k++) {
+                              if (orderMap[test[k].Poste] > orderMap[test[k+1].Poste]) return false;
+                            }
+                            return true;
+                          };
+                          return canInsertAt(i + 1) ? <DropZone onClick={() => handleInsertion(i + 1)} /> : null;
+                        })()}
+                      </React.Fragment>
+                    ));
+                  })()}
                 </div>
               </div>
 
@@ -1275,32 +1544,22 @@
 
                     const isBenchCardPlayable = (card) => {
                       if (!isSelectingMode) return true; // pas en mode sélection = pas grisé
-
-                      // Déjà 5 joueurs sur le terrain (sauf si on est en train de remplacer, auquel qu'on a déjà sorti quelqu'un)
-                      const maxOnField = (phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0)) ? 4 : 4;
                       if (currentLineup.length >= 5) return false;
-
-                      // Déjà 2 joueurs de ce poste sur le terrain
                       const posOnField = currentLineup.filter(p => p.Poste === card.Poste).length;
                       if (posOnField >= 2) return false;
 
-                      // Vérifier si l'ajout de ce joueur peut encore mener à un 5 valide
-                      // Un poste manquant = poste non présent sur le terrain ET non couvrable avec les cartes restantes du banc (hors cette carte)
                       const afterLineup = [...currentLineup, card];
                       const slotsLeft = 5 - afterLineup.length;
                       const remainingBench = hands[0].filter((_, bi) => hands[0][bi] !== card);
 
-                      // Pour chaque poste, vérifier qu'on a au moins 1 exemplaire (terrain ou banc restant)
                       const missingPostes = POSTES.filter(pos => {
                         const onField = afterLineup.filter(p => p.Poste === pos).length;
-                        if (onField > 0) return false; // déjà couvert
-                        // Peut-on encore le couvrir avec le banc restant ?
+                        if (onField > 0) return false;
                         const availInBench = remainingBench.filter(p => p.Poste === pos).length;
                         return availInBench === 0;
                       });
                       if (missingPostes.length > 0) return false;
 
-                      // Vérifier qu'avec les slots restants on peut couvrir tous les postes manquants après cet ajout
                       const uncoveredPostes = POSTES.filter(pos => afterLineup.filter(p => p.Poste === pos).length === 0);
                       if (uncoveredPostes.length > slotsLeft) return false;
 
@@ -1308,13 +1567,18 @@
                     };
 
                     return hands[0].map((p, i) => (
-                      <PlayerCard key={i} player={p} size="sm" selected={selectedInHand === i}
+                      <PlayerCard
+                        key={i}
+                        player={p}
+                        size="sm"
+                        selected={selectedInHand === i}
                         grayed={isSelectingMode && !isBenchCardPlayable(p)}
                         onClick={() => {
                           if (!isBenchCardPlayable(p)) return;
                           if ((phase === PHASES.REPLACING_DEF && pausedId === 0) || phase === PHASES.PLACING_REPLACEMENT) { setSelectedInHand(i); setPhase(PHASES.PLACING_REPLACEMENT); }
                           else { setSelectedInHand(i === selectedInHand ? null : i); }
-                        }} />
+                        }}
+                      />
                     ));
                   })()}
                 </div>
@@ -1387,6 +1651,9 @@
       const ring = isAttacking ? 'ring-4 ring-yellow-500 border-yellow-500/50 bg-gradient-to-br from-yellow-900/40 via-yellow-900/20 to-black glow-gold'
         : isDefending ? 'ring-4 ring-slate-400 border-slate-400/50 bg-gradient-to-br from-slate-700/40 via-slate-800/20 to-black glow-silver'
         : 'border-slate-800 bg-slate-900/20';
+
+      const synergyTeams = computeSynergyTeams(lineup);
+
       return (
         <div data-team-id={teamId} className={`p-3 md:p-4 rounded-3xl border team-zone-transition relative shadow-lg ${ring} w-full min-w-0`}>
           <div className={`absolute -top-2.5 left-6 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg uppercase whitespace-nowrap ${isAttacking ? 'bg-yellow-600' : isDefending ? 'bg-slate-500' : 'bg-slate-800'}`}>
@@ -1394,10 +1661,17 @@
           </div>
           <div className="flex justify-center items-center gap-1 md:gap-2 min-h-[120px] md:min-h-[220px] w-full py-2">
             {lineup.map((p, i) => (
-              <PlayerCard key={i} player={p} size="sm"
-                isTarget={isDefending && targetSlot === i} isAttacker={isAttacking && targetSlot === i}
+              <PlayerCard
+                key={i}
+                player={p}
+                size="sm"
+                synergyTeams={synergyTeams}
+                isTarget={isDefending && targetSlot === i}
+                isAttacker={isAttacking && targetSlot === i}
                 isJumping={isDuelActive && targetSlot === i && (isAttacking || isDefending)}
-                canBeTargeted={isDefending && !targetSlot} onClick={() => onSlotClick(i)} />
+                canBeTargeted={isDefending && !targetSlot}
+                onClick={() => onSlotClick(i)}
+              />
             ))}
           </div>
         </div>
