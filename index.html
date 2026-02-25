@@ -352,7 +352,22 @@
 
       const offVal = synergyTeams ? effectiveOFF(player, synergyTeams) : (player.OFF ?? 0);
       const defVal = synergyTeams ? effectiveDEF(player, synergyTeams) : (player.DEF ?? 0);
-
+      // PRIORITÉ DES CONTOURS (violet > gold > jaune > bleu)
+      const ringClass = (() => {
+        if (isSynergy) {
+          return "ring-2 md:ring-4 ring-violet-500 shadow-[0_0_22px_rgba(139,92,246,0.45)]";
+        }
+        if (isTarget || isAttacker) {
+          return "ring-2 md:ring-4 ring-orange-500 z-30 scale-105";
+        }
+        if (canBeTargeted) {
+          return "ring-2 md:ring-4 ring-yellow-400";
+        }
+        if (selected) {
+          return "ring-2 md:ring-4 ring-blue-500 z-20";
+        }
+        return "";
+      })();
       return (
         <div
           onClick={(!disabled || canBeTargeted) && !grayed ? onClick : undefined}
@@ -364,16 +379,7 @@
             bg-slate-800 shadow-2xl card-shadow
 
             ${grayed ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}
-
-            ${selected ? "ring-2 md:ring-4 ring-blue-500 z-20" : ""}
-            ${isTarget || isAttacker ? "ring-2 md:ring-4 ring-orange-500 z-30 scale-105" : ""}
-            ${canBeTargeted ? "ring-2 md:ring-4 ring-yellow-400" : ""}
-
-            ${isSynergy
-              ? "ring-2 md:ring-4 ring-violet-500 shadow-[0_0_22px_rgba(139,92,246,0.45)]"
-              : ""
-            }
-
+            ${ringClass}
             ${isJumping ? "animate-bounce" : ""}
           `}
         >
