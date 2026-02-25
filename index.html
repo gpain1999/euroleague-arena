@@ -322,92 +322,88 @@ const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
     (expectedConcedeEV(my, oppA) + expectedConcedeEV(my, oppB)) / 2;
   return w.off * atk - w.def * def;
 };
+
     // ==============================
     // PLAYER CARD
     // ==============================
-const PlayerCard = ({
-  player, synergyTeams,
-  onClick, selected, disabled,
-  isTarget, isAttacker, isJumping,
-  canBeTargeted, size="md", grayed=false
-}) => {
-  if (!player) return null;
+    const PlayerCard = ({
+      player, synergyTeams,
+      onClick, selected, disabled,
+      isTarget, isAttacker, isJumping,
+      canBeTargeted, size = "md", grayed = false
+    }) => {
+      if (!player) return null;
 
-  const cardBaseWidth = "w-[18%]";
-  const maxWidth = size === "sm" ? "max-w-[140px]" : "max-w-[180px]";
+      const cardBaseWidth = "w-[18%]";
+      const maxWidth = size === "sm" ? "max-w-[140px]" : "max-w-[180px]";
 
-  const teamName = getTeamName(player);
-  const isSynergy = !!teamName && synergyTeams?.has(teamName);
+      const teamName = getTeamName(player);
+      const isSynergy = !!teamName && synergyTeams?.has(teamName);
 
-  const offVal = synergyTeams ? effectiveOFF(player, synergyTeams) : (player.OFF ?? 0);
-  const defVal = synergyTeams ? effectiveDEF(player, synergyTeams) : (player.DEF ?? 0);
+      const offVal = synergyTeams ? effectiveOFF(player, synergyTeams) : (player.OFF ?? 0);
+      const defVal = synergyTeams ? effectiveDEF(player, synergyTeams) : (player.DEF ?? 0);
 
-  return (
-    <div
-      onClick={(!disabled || canBeTargeted) && !grayed ? onClick : undefined}
-      style={{ aspectRatio: "800/1117" }}
-className={`relative rounded-lg md:rounded-xl overflow-hidden shadow-2xl transition-all duration-300 flex-shrink-0
-  ${isSynergy
-    ? 'ring-[3px] ring-violet-500 shadow-[0_0_25px_rgba(139,92,246,0.45)]'
-    : ''}
-      ${cardBaseWidth} ${maxWidth} bg-slate-800 card-shadow
-        ${grayed ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}
-        ${selected ? "ring-2 md:ring-4 ring-blue-500 z-20" : ""}
-        ${isTarget || isAttacker ? "ring-2 md:ring-4 ring-orange-500 z-30 scale-105" : ""}
-        ${isJumping ? "animate-bounce" : ""}
-        ${canBeTargeted ? "ring-2 md:ring-4 ring-yellow-400" : ""}`}
-    >
-      {/* Image */}
-      <img
-        src={`cartes2/${String(player.TEAM_y || player.TEAM_x || "").trim()}_card_${player.PLAYER_ID}.png`}
-        alt={player.NAME}
-        className="w-full h-full object-cover"
-        onError={(e) => {
-          e.target.onerror = null;
-          e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${player.NAME ? player.NAME.split(",")[0] : "N/A"}`;
-        }}
-      />
+      return (
+        <div
+          onClick={(!disabled || canBeTargeted) && !grayed ? onClick : undefined}
+          style={{ aspectRatio: "800/1117" }}
+          className={`
+            relative rounded-lg md:rounded-xl overflow-hidden
+            transition-all duration-300 flex-shrink-0
+            ${cardBaseWidth} ${maxWidth}
+            bg-slate-800 shadow-2xl card-shadow
 
-      {/* Overlay bas (nom/stats) — on ajoute du padding bottom si badge */}
-      <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/95 to-transparent
-                       p-1 md:p-1.5 pt-3 md:pt-4 text-[7px] md:text-[9px] lg:text-[11px]
-                       ${isSynergy ? "pb-8" : "pb-1"}`}>
-        <p className="font-black truncate uppercase text-white leading-none mb-1">
-          {player.NAME ? player.NAME.split(",")[0] : "???"}
-        </p>
-        <div className="flex justify-between font-mono">
-          <span className="font-bold text-orange-400">O:{offVal}</span>
-          <span className="font-bold text-blue-400">D:{defVal}</span>
+            ${grayed ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}
+
+            ${selected ? "ring-2 md:ring-4 ring-blue-500 z-20" : ""}
+            ${isTarget || isAttacker ? "ring-2 md:ring-4 ring-orange-500 z-30 scale-105" : ""}
+            ${canBeTargeted ? "ring-2 md:ring-4 ring-yellow-400" : ""}
+
+            ${isSynergy
+              ? "ring-2 md:ring-4 ring-violet-500 shadow-[0_0_22px_rgba(139,92,246,0.45)]"
+              : ""
+            }
+
+            ${isJumping ? "animate-bounce" : ""}
+          `}
+        >
+          {/* Image */}
+          <img
+            src={`cartes2/${String(player.TEAM_y || player.TEAM_x || "").trim()}_card_${player.PLAYER_ID}.png`}
+            alt={player.NAME}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${
+                player.NAME ? player.NAME.split(",")[0] : "N/A"
+              }`;
+            }}
+          />
+
+          {/* Overlay bas */}
+          <div className="absolute bottom-0 left-0 right-0
+                          bg-gradient-to-t from-black via-black/95 to-transparent
+                          p-1 md:p-1.5 pt-3 md:pt-4
+                          text-[7px] md:text-[9px] lg:text-[11px]">
+            <p className="font-black truncate uppercase text-white leading-none mb-1">
+              {player.NAME ? player.NAME.split(",")[0] : "???"}
+            </p>
+
+            <div className="flex justify-between font-mono">
+              <span className="font-bold text-orange-400">O:{offVal}</span>
+              <span className="font-bold text-blue-400">D:{defVal}</span>
+            </div>
+
+            <div className="absolute top-1 right-1
+                            bg-yellow-500 text-black px-1 rounded-md
+                            font-black border border-yellow-600
+                            text-[6px] md:text-[8px] lg:text-[10px]">
+              {player.Poste}
+            </div>
+          </div>
         </div>
-        <div className="absolute top-1 right-1 bg-yellow-500 text-black px-1 rounded-md font-black text-[6px] md:text-[8px] lg:text-[10px] border border-yellow-600">
-          {player.Poste}
-        </div>
-      </div>
-
-      {/* ✅ Badge "sous" la carte (dans la zone basse dédiée), zéro débordement */}
-{isSynergy && (
-  <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-[90%] pointer-events-none">
-    <div className="
-      w-full text-center
-      px-2 py-1
-      rounded-full
-      font-black uppercase tracking-wider
-      text-[10px] sm:text-[11px] md:text-[12px] lg:text-[13px]
-      bg-violet-500/90 text-white
-      border border-violet-200/50
-      shadow-[0_0_16px_rgba(139,92,246,0.35)]
-      leading-none
-    ">
-      BONUS +0.5
-    </div>
-  </div>
-)}
-
-
-
-    </div>
-  );
-};
+      );
+    };
 
     // ==============================
     // HOME SCREEN
