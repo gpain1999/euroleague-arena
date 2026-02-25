@@ -204,7 +204,14 @@
       );
     };
 
-    const GAME_STATES = { LOADING: 'LOADING', HOME: 'HOME', PREGAME: 'PREGAME', PLAYING: 'PLAYING', GAMEOVER: 'GAMEOVER' };
+    const GAME_STATES = {
+      LOADING: 'LOADING',
+      HOME: 'HOME',
+      PREGAME: 'PREGAME',
+      KICKOFF: 'KICKOFF',     // <-- AJOUT
+      PLAYING: 'PLAYING',
+      GAMEOVER: 'GAMEOVER'
+    };
     const PHASES = {
       IDLE: 'IDLE', ROLLING: 'ROLLING', CHOOSING_TARGET: 'CHOOSING_TARGET',
       DUEL: 'DUEL', REPLACING_DEF: 'REPLACING_DEF', PLACING_REPLACEMENT: 'PLACING_REPLACEMENT',
@@ -401,7 +408,81 @@
         </div>
       );
     };
+    // ==============================
+    // RoleDrawModal (tirage au sort attaque/défense/pause)
+    // ==============================
+    const RoleDrawModal = ({ open, tick, phase, result, onSkip }) => {
+      if (!open) return null;
 
+      const names = ["VOUS", "IA 1", "IA 2"];
+
+      // pendant le spin : on “fait défiler” en offsetant avec tick
+      const spinningName = (offset) => names[(tick + offset) % 3];
+
+      const attackerLabel = phase === "SPIN" ? spinningName(0) : names[result.attacker];
+      const defenderLabel = phase === "SPIN" ? spinningName(1) : names[result.defender];
+      const pausedLabel   = phase === "SPIN" ? spinningName(2) : names[result.paused];
+
+      const Box = ({ title, value, accent }) => (
+        <div className={`rounded-3xl border p-5 text-center bg-slate-950/60 shadow-2xl ${accent}`}>
+          <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{title}</div>
+          <div className={`mt-3 font-display font-black italic uppercase text-3xl md:text-4xl ${phase === "SPIN" ? "opacity-80" : ""}`}>
+            {value}
+          </div>
+          {phase === "SPIN" && (
+            <div className="mt-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              Tirage en cours...
+            </div>
+          )}
+        </div>
+      );
+
+      return (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
+          <div className="relative w-full max-w-3xl rounded-3xl border border-orange-500/25 bg-slate-950 shadow-2xl overflow-hidden">
+            <div className="p-6 md:p-8">
+              <div className="text-center mb-6">
+                <div className="font-display font-black italic uppercase text-3xl md:text-4xl text-white">
+                  🎲 Tirage au sort
+                </div>
+                <div className="text-slate-400 text-sm font-bold mt-2">
+                  Qui attaque ? Qui défend ? Qui est en pause ?
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Box title="ATTAQUE" value={attackerLabel} accent="border-yellow-500/30" />
+                <Box title="DÉFENSE" value={defenderLabel} accent="border-slate-400/30" />
+                <Box title="PAUSE" value={pausedLabel} accent="border-blue-500/30" />
+              </div>
+
+              <div className="mt-6 flex items-center justify-center gap-3">
+                {phase === "SPIN" ? (
+                  <div className="text-slate-500 text-xs font-black uppercase tracking-widest">
+                    Attribution des rôles...
+                  </div>
+                ) : (
+                  <div className="text-green-400 text-xs font-black uppercase tracking-widest">
+                    Rôles attribués ✅
+                  </div>
+                )}
+              </div>
+
+              {/* Option “skip” si tu veux debug, sinon tu peux enlever */}
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={onSkip}
+                  className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black uppercase text-xs"
+                >
+                  Ignorer l’animation
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
     // ==============================
     // SCORE SELECT MODAL (- 8 +)
     // ==============================
@@ -1094,9 +1175,9 @@
       const [phase, setPhase] = useState(PHASES.IDLE);
       const [logs, setLogs] = useState(["Prêt pour le match !"]);
       const [scores, setScores] = useState([0, 0, 0]);
-      const [attackerId, setAttackerId] = useState(0);
-      const [defenderId, setDefenderId] = useState(1);
-      const [pausedId, setPausedId] = useState(2);
+      const [attackerId, setAttackerId] = useState(null);
+      const [defenderId, setDefenderId] = useState(null);
+      const [pausedId, setPausedId] = useState(null);
       const [hands, setHands] = useState([[], [], []]);
       const [lineups, setLineups] = useState([[], [], []]);
       const [decks, setDecks] = useState({ S: [], M: [], L: [] });
@@ -1110,7 +1191,11 @@
       const [stats, setStats] = useState([{}, {}, {}]);
       const [pregameError, setPregameError] = useState(null);
       const [overlay, setOverlay] = useState(null); // 'RULES' | 'CARDS' | null
-
+      // 🎲 Tirage au sort des rôles
+      const [showRoleDraw, setShowRoleDraw] = useState(false);
+      const [roleDrawPhase, setRoleDrawPhase] = useState("SPIN"); // SPIN | REVEAL
+      const [roleDrawResult, setRoleDrawResult] = useState(null); // { attacker, defender, paused }
+      const [roleDrawTick, setRoleDrawTick] = useState(0);        // pour faire défiler l'affichage
       // ✅ SCORE DE VICTOIRE (6..10) + popup " - 8 + "
       const [targetScore, setTargetScore] = useState(8);
       const [showScoreModal, setShowScoreModal] = useState(false);
@@ -1156,6 +1241,62 @@
         }
         setShowStatsModal(true);
       }, [scores, targetScore]);
+
+
+      useEffect(() => {
+        if (!showRoleDraw) return;
+        if (roleDrawPhase !== "REVEAL") return;
+        if (!roleDrawResult) return;
+
+        const names = ["VOUS", "IA 1", "IA 2"];
+        const { attacker, defender, paused } = roleDrawResult;
+
+        setAttackerId(attacker);
+        setDefenderId(defender);
+        setPausedId(paused);
+
+        addLog(`✅ Rôles : ${names[attacker]} attaque, ${names[defender]} défend, ${names[paused]} en pause.`);
+
+        // petite pause “ciné” avant de lancer réellement
+        const t = setTimeout(() => {
+          setShowRoleDraw(false);
+          setGameState(GAME_STATES.PLAYING);
+
+          // IMPORTANT : reset du tour
+          setPhase(PHASES.IDLE);
+          setLastRoll(null);
+          setTargetSlot(null);
+
+          // log de démarrage orienté joueur
+          if (attacker === 0) addLog(`🏀 Match commencé ! Tu attaques en premier. Victoire à ${targetScore} points.`);
+          else addLog(`🏀 Match commencé ! ${names[attacker]} attaque en premier. Victoire à ${targetScore} points.`);
+        }, 1200);
+
+        return () => clearTimeout(t);
+      }, [showRoleDraw, roleDrawPhase, roleDrawResult, targetScore]);
+      useEffect(() => {
+        if (!showRoleDraw) return;
+        if (roleDrawPhase !== "SPIN") return;
+
+        // tick rapide pour faire défiler les noms
+        const interval = setInterval(() => {
+          setRoleDrawTick(t => t + 1);
+        }, 90);
+
+        // stop après X secondes + fixe un résultat
+        const timeout = setTimeout(() => {
+          clearInterval(interval);
+
+          const [a, d, p] = shuffle3();
+          setRoleDrawResult({ attacker: a, defender: d, paused: p });
+          setRoleDrawPhase("REVEAL");
+        }, 2600);
+
+        return () => {
+          clearInterval(interval);
+          clearTimeout(timeout);
+        };
+      }, [showRoleDraw, roleDrawPhase]);
 
       useEffect(() => {
         const loadAutoCsv = async () => {
@@ -1204,9 +1345,9 @@
         setDecks({ S: s, M: m, L: l });
         setLineups([[], [], []]);
         setScores([0, 0, 0]);
-        setAttackerId(0);
-        setDefenderId(1);
-        setPausedId(2);
+        setAttackerId(null);
+        setDefenderId(null);
+        setPausedId(null);
         setPhase(PHASES.IDLE);
         setLastRoll(null);
         setTargetSlot(null);
@@ -1256,7 +1397,28 @@
         setHands(newHands); setLineups(newLineups); setSelectedInHand(null);
         if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) { setPhase(PHASES.ATK_SUB_DECISION); addLog("Remplacement effectué."); setSubDoneThisTurn(true); }
       };
+      const shuffle3 = () => {
+        const arr = [0, 1, 2];
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      };
 
+      const beginRoleDraw = () => {
+        setGameState(GAME_STATES.KICKOFF);
+        setPhase(PHASES.IDLE);
+        setLastRoll(null);
+        setTargetSlot(null);
+
+        setRoleDrawPhase("SPIN");
+        setRoleDrawResult(null);
+        setRoleDrawTick(0);
+        setShowRoleDraw(true);
+
+        addLog("🎲 Tirage au sort des rôles...");
+      };
       const validatePregame = () => {
         const count = lineups[0].length;
         if (count === 0) return setPregameError({ title: "Équipe vide !", body: "Vous n'avez placé aucun joueur sur le terrain. Cliquez sur une carte du banc pour la sélectionner, puis sur un + pour la placer." });
@@ -1274,8 +1436,8 @@
           newLineups[idx] = aiL; newHands[idx] = h;
         });
         setLineups(newLineups); setHands(newHands);
-        setGameState(GAME_STATES.PLAYING);
-        setAttackerId(0); setDefenderId(1); setPausedId(2);
+        addLog("✅ Équipes validées. Préparation du match...");
+        beginRoleDraw();
         [0,1,2].forEach(tid => newLineups[tid].forEach(p => ensurePlayerInStats(tid, p)));
         addLog(`🏀 Match commencé ! Victoire à ${targetScore} points. Cible : IA 1.`);
       };
@@ -1325,6 +1487,8 @@
       }, [attackerId, defenderId, pausedId, lineups, scores, targetScore]);
 
       const rollDie = () => {
+        if (gameState !== GAME_STATES.PLAYING) return;
+        if (attackerId === null) return;
         if (phase !== PHASES.IDLE || attackerId !== 0) return;
         const roll = Math.floor(Math.random() * 6) + 1;
         setLastRoll(roll); setPhase(PHASES.ROLLING);
@@ -1639,9 +1803,25 @@
               </div>
 
               <div data-team-id={0} className={`p-4 md:p-6 rounded-[2.5rem] border team-zone-transition relative shadow-lg ${getUserBoardStyle()}`}>
-                <div className={`absolute -top-3 left-8 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg
-                  ${attackerId === 0 ? 'bg-yellow-600' : defenderId === 0 ? 'bg-slate-500' : 'bg-blue-600'}`}>
-                  {attackerId === 0 ? "🔥 VOUS ATTAQUEZ" : defenderId === 0 ? "🛡️ VOUS DÉFENDEZ" : "VOUS (EN PAUSE)"}
+                <div
+                  className={`absolute -top-3 left-8 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg
+                    ${
+                      attackerId === null
+                        ? 'bg-slate-600'
+                        : attackerId === 0
+                        ? 'bg-yellow-600'
+                        : defenderId === 0
+                        ? 'bg-slate-500'
+                        : 'bg-blue-600'
+                    }`}
+                >
+                  {attackerId === null
+                    ? "🧩 COMPOSITION D'ÉQUIPE"
+                    : attackerId === 0
+                    ? "🔥 VOUS ATTAQUEZ"
+                    : defenderId === 0
+                    ? "🛡️ VOUS DÉFENDEZ"
+                    : "⏸️ VOUS (EN PAUSE)"}
                 </div>
 
                 <div className="flex justify-center items-center gap-1.5 md:gap-2 min-h-[140px] md:min-h-[220px] w-full px-2 py-2">
@@ -1774,6 +1954,18 @@
             </aside>
           </main>
 
+          <RoleDrawModal
+            open={showRoleDraw}
+            tick={roleDrawTick}
+            phase={roleDrawPhase}
+            result={roleDrawResult}
+            onSkip={() => {
+              // skip direct : fixe un résultat instant
+              const [a, d, p] = shuffle3();
+              setRoleDrawResult({ attacker: a, defender: d, paused: p });
+              setRoleDrawPhase("REVEAL");
+            }}
+          />
           <StatsModal open={showStatsModal} onClose={() => setShowStatsModal(false)} stats={stats} scores={scores} onReplay={startNewGame} onMenu={() => { setAppScreen('HOME'); setShowStatsModal(false); }} />
 
           {pregameError && (
