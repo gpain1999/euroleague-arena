@@ -349,6 +349,7 @@
 
       const teamName = getTeamName(player);
       const isSynergy = !!teamName && synergyTeams?.has(teamName);
+      const imgFolder = isSynergy ? "cartes3" : "cartes2";
 
       const offVal = synergyTeams ? effectiveOFF(player, synergyTeams) : (player.OFF ?? 0);
       const defVal = synergyTeams ? effectiveDEF(player, synergyTeams) : (player.DEF ?? 0);
@@ -385,7 +386,7 @@
         >
           {/* Image */}
           <img
-            src={`cartes2/${String(player.TEAM_y || player.TEAM_x || "").trim()}_card_${player.PLAYER_ID}.png`}
+            src={`${imgFolder}/${String(player.TEAM_y || player.TEAM_x || "").trim()}_card_${player.PLAYER_ID}.png`}
             alt={player.NAME}
             className="w-full h-full object-cover"
             onError={(e) => {
