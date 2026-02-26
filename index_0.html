@@ -74,6 +74,7 @@
     .glow-gold { box-shadow: 0 0 40px -10px rgba(234,179,8,0.2); }
     .glow-silver { box-shadow: 0 0 40px -10px rgba(148,163,184,0.2); }
 
+    /* HOME SCREEN */
     .home-bg {
       background: radial-gradient(ellipse at 30% 20%, rgba(249,115,22,0.15) 0%, transparent 50%),
                   radial-gradient(ellipse at 70% 80%, rgba(234,179,8,0.1) 0%, transparent 50%),
@@ -96,12 +97,14 @@
     .home-btn:hover::before { left: 100%; }
     .home-btn:hover { transform: translateY(-2px); }
 
+    /* RULES */
     .rule-section {
       border-left: 3px solid;
       padding-left: 1rem;
       margin-bottom: 1.5rem;
     }
 
+    /* CARD GALLERY */
     .team-card-btn {
       transition: all 0.3s ease;
       position: relative;
@@ -117,86 +120,6 @@
       transition: opacity 0.3s;
     }
     .team-card-btn:hover::after { opacity: 1; }
-
-    /* ====== DRAFT STYLES ====== */
-    @keyframes draftCardIn {
-      from { opacity: 0; transform: translateY(-40px) scale(0.85) rotateX(15deg); }
-      to   { opacity: 1; transform: translateY(0)    scale(1)    rotateX(0deg);  }
-    }
-    .draft-card-in { animation: draftCardIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both; }
-    .draft-card-in-1 { animation: draftCardIn 0.45s 0.05s cubic-bezier(0.34,1.56,0.64,1) both; }
-    .draft-card-in-2 { animation: draftCardIn 0.45s 0.12s cubic-bezier(0.34,1.56,0.64,1) both; }
-    .draft-card-in-3 { animation: draftCardIn 0.45s 0.19s cubic-bezier(0.34,1.56,0.64,1) both; }
-
-    @keyframes draftCardPick {
-      0%   { transform: scale(1); }
-      30%  { transform: scale(1.12); box-shadow: 0 0 40px rgba(249,115,22,0.7); }
-      100% { transform: scale(0) translateY(-60px); opacity: 0; }
-    }
-    .draft-card-pick { animation: draftCardPick 0.5s ease forwards; }
-
-    @keyframes picked-bounce {
-      0%   { transform: scale(0.5); opacity: 0; }
-      60%  { transform: scale(1.08); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .picked-bounce { animation: picked-bounce 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
-
-    @keyframes ai-thinking {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
-    }
-    .ai-thinking { animation: ai-thinking 0.7s ease-in-out infinite; }
-
-    .draft-pool-card {
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      cursor: pointer;
-      perspective: 600px;
-    }
-    .draft-pool-card:hover {
-      transform: translateY(-8px) scale(1.03);
-      box-shadow: 0 20px 50px rgba(249,115,22,0.35);
-    }
-    .draft-pool-card.disabled {
-      cursor: not-allowed;
-      filter: brightness(0.5) saturate(0.4);
-      pointer-events: none;
-    }
-
-    .serpentin-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      display: inline-block;
-      margin: 0 2px;
-    }
-
-    @keyframes glow-pulse {
-      0%, 100% { box-shadow: 0 0 12px rgba(249,115,22,0.4); }
-      50% { box-shadow: 0 0 30px rgba(249,115,22,0.8); }
-    }
-    .active-turn-glow { animation: glow-pulse 1.2s ease-in-out infinite; }
-
-    @keyframes slideRight {
-      from { transform: translateX(-20px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    .slide-right { animation: slideRight 0.3s ease both; }
-
-    .draft-bg {
-      background:
-        radial-gradient(ellipse at 15% 50%, rgba(249,115,22,0.08) 0%, transparent 45%),
-        radial-gradient(ellipse at 85% 20%, rgba(234,179,8,0.06) 0%, transparent 40%),
-        radial-gradient(ellipse at 50% 80%, rgba(139,92,246,0.06) 0%, transparent 40%),
-        #020617;
-    }
-
-    .picked-card-slot {
-      border: 1.5px dashed #1e293b;
-      border-radius: 12px;
-      background: rgba(15,23,42,0.6);
-      transition: all 0.3s;
-    }
-    .picked-card-slot.filled { border-color: transparent; background: transparent; }
   </style>
 </head>
 
@@ -260,34 +183,34 @@
           <path d="m9 18 6-6-6-6"/>
         </svg>
       ),
-      Shuffle: () => (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="16 3 21 3 21 8"/><line x1="4" x2="21" y1="20" y2="3"/>
-          <polyline points="21 16 21 21 16 21"/><line x1="15" x2="21" y1="15" y2="21"/>
-          <line x1="4" x2="9" y1="4" y2="9"/>
-        </svg>
-      ),
-      Draft: () => (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/>
-          <path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-      ),
     };
 
     const BasketLogo = ({ size = 36, className = "" }) => {
       const [error, setError] = React.useState(false);
-      if (error) return <Icons.Basketball size={size} className={className} />;
+
+      if (error) {
+        return <Icons.Basketball size={size} className={className} />;
+      }
+
       return (
-        <img src="euroleague_little.png" alt="Euroleague" width={size} height={size}
-          className={className} onError={() => setError(true)} />
+        <img
+          src="euroleague_little.png"
+          alt="Euroleague"
+          width={size}
+          height={size}
+          className={className}
+          onError={() => setError(true)}
+        />
       );
     };
 
     const GAME_STATES = {
-      LOADING: 'LOADING', HOME: 'HOME', PREGAME: 'PREGAME', KICKOFF: 'KICKOFF',
-      PLAYING: 'PLAYING', GAMEOVER: 'GAMEOVER'
+      LOADING: 'LOADING',
+      HOME: 'HOME',
+      PREGAME: 'PREGAME',
+      KICKOFF: 'KICKOFF',     // <-- AJOUT
+      PLAYING: 'PLAYING',
+      GAMEOVER: 'GAMEOVER'
     };
     const PHASES = {
       IDLE: 'IDLE', ROLLING: 'ROLLING', CHOOSING_TARGET: 'CHOOSING_TARGET',
@@ -296,9 +219,8 @@
     };
     const POSTES = ['S', 'M', 'L'];
     const AUTO_CSV_URL = 'data/players.csv';
-    const DRAFT_PICKS_PER_TEAM = 9; // 3S + 3M + 3L
 
-    const { useState, useEffect, useCallback, useRef } = React;
+    const { useState, useEffect, useCallback } = React;
 
     const parsePlayersCsv = (csvText) => {
       const lines = csvText.trim().split(/\r?\n/);
@@ -324,130 +246,127 @@
     };
 
     // ==============================
-    // SYNERGY
+    // SYNERGY (BONUS +0.5 OFF/DEF)
     // ==============================
     const getTeamName = (p) => String(p?.TEAM_y || p?.TEAM_x || '').trim();
+
     const computeSynergyTeams = (lineup) => {
       const counts = {};
-      (lineup || []).forEach(p => { const t = getTeamName(p); if (!t) return; counts[t] = (counts[t] || 0) + 1; });
+      (lineup || []).forEach(p => {
+        const t = getTeamName(p);
+        if (!t) return;
+        counts[t] = (counts[t] || 0) + 1;
+      });
       return new Set(Object.entries(counts).filter(([, c]) => c >= 2).map(([t]) => t));
     };
+
     const effectiveOFF = (p, synergyTeams) => {
-      const t = getTeamName(p); const base = Number(p?.OFF ?? 0);
+      const t = getTeamName(p);
+      const base = Number(p?.OFF ?? 0);
       return (t && synergyTeams?.has(t)) ? base + 0.5 : base;
     };
+
     const effectiveDEF = (p, synergyTeams) => {
-      const t = getTeamName(p); const base = Number(p?.DEF ?? 0);
+      const t = getTeamName(p);
+      const base = Number(p?.DEF ?? 0);
       return (t && synergyTeams?.has(t)) ? base + 0.5 : base;
     };
 
     // ==============================
-    // AI HELPERS
+    // AI HELPERS (advanced)
     // ==============================
     const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
     const probScore = (atkPlayer, atkLineup, defPlayer, defLineup) => {
       if (!atkPlayer || !defPlayer) return 0.05;
-      const atkSyn = computeSynergyTeams(atkLineup); const defSyn = computeSynergyTeams(defLineup);
-      return clamp(0.5 + (effectiveOFF(atkPlayer, atkSyn) - effectiveDEF(defPlayer, defSyn)) / 18, 0.05, 0.95);
+      const atkSyn = computeSynergyTeams(atkLineup);
+      const defSyn = computeSynergyTeams(defLineup);
+      const atkOff = effectiveOFF(atkPlayer, atkSyn);
+      const defDef = effectiveDEF(defPlayer, defSyn);
+      return clamp(0.5 + (atkOff - defDef) / 18, 0.05, 0.95);
     };
+
     const expectedAttackEV = (atkLineup, defLineup) => {
-      const probs = atkLineup.map((p, i) => probScore(p, atkLineup, defLineup[i], defLineup));
-      return (probs.reduce((a, b) => a + b, 0) / 6) + (Math.max(...probs) / 6);
+      const probs = atkLineup.map((p, i) =>
+        probScore(p, atkLineup, defLineup[i], defLineup)
+      );
+      const sum = probs.reduce((a, b) => a + b, 0);
+      const best = Math.max(...probs);
+      return (sum / 6) + (best / 6);
     };
-    const expectedConcedeEV = (myLineup, oppLineup) => expectedAttackEV(oppLineup, myLineup);
+
+    const expectedConcedeEV = (myLineup, oppLineup) =>
+      expectedAttackEV(oppLineup, myLineup);
+
     const isValidLineup = (lu) => {
       if (!lu || lu.length !== 5) return false;
       const cnt = { S: 0, M: 0, L: 0 };
       for (const p of lu) cnt[p.Poste]++;
+
       if (!(cnt.S && cnt.M && cnt.L)) return false;
       if (cnt.S > 2 || cnt.M > 2 || cnt.L > 2) return false;
+
       const order = { S: 1, M: 2, L: 3 };
-      for (let i = 0; i < lu.length - 1; i++) { if (order[lu[i].Poste] > order[lu[i + 1].Poste]) return false; }
+      for (let i = 0; i < lu.length - 1; i++) {
+        if (order[lu[i].Poste] > order[lu[i + 1].Poste]) return false;
+      }
       return true;
     };
+
     const generateInsertions = (base, card) => {
       const out = [];
       for (let i = 0; i <= base.length; i++) {
-        const test = [...base]; test.splice(i, 0, card);
-        if (test.length === 5 && isValidLineup(test)) out.push(test);
+        const test = [...base];
+        test.splice(i, 0, card);
+        if (test.length === 5 && isValidLineup(test)) {
+          out.push(test);
+        }
       }
       return out;
     };
+
     const lineupUtility = (my, oppA, oppB, w = { off: 0.6, def: 0.4 }) => {
-      const atk = (expectedAttackEV(my, oppA) + expectedAttackEV(my, oppB)) / 2;
-      const def = (expectedConcedeEV(my, oppA) + expectedConcedeEV(my, oppB)) / 2;
+      const atk =
+        (expectedAttackEV(my, oppA) + expectedAttackEV(my, oppB)) / 2;
+      const def =
+        (expectedConcedeEV(my, oppA) + expectedConcedeEV(my, oppB)) / 2;
       return w.off * atk - w.def * def;
-    };
-
-    // ==============================
-    // DRAFT LOGIC HELPERS
-    // ==============================
-    /**
-     * Ordre serpentin pour 3 équipes, DRAFT_PICKS_PER_TEAM picks chacune.
-     * Total picks = 27. Serpentin : 0,1,2, 2,1,0, 0,1,2, 2,1,0, ...
-     */
-    const buildSerpentinOrder = (totalPicks) => {
-      const order = [];
-      let round = 0;
-      while (order.length < totalPicks) {
-        const base = [0, 1, 2];
-        const seq = round % 2 === 0 ? base : [...base].reverse();
-        for (const t of seq) { if (order.length < totalPicks) order.push(t); }
-        round++;
-      }
-      return order;
-    };
-    const DRAFT_ORDER = buildSerpentinOrder(DRAFT_PICKS_PER_TEAM * 3); // 27 picks
-
-    /**
-     * Évalue la valeur d'un pick pour l'IA.
-     * L'IA cherche à maximiser l'utilité de son roster complet (hand + picked).
-     */
-    const aiDraftValue = (card, currentHand, opponentHands) => {
-      const newHand = [...currentHand, card];
-      // Valeur intrinsèque
-      const intrinsic = (Number(card.OFF) + Number(card.DEF)) / 2;
-      // Synergie potentielle avec sa main actuelle
-      const teamCounts = {};
-      newHand.forEach(p => { const t = getTeamName(p); if (t) teamCounts[t] = (teamCounts[t] || 0) + 1; });
-      const synergyBonus = Object.values(teamCounts).filter(c => c >= 2).length * 0.8;
-      // Bloquer les adversaires : pénalise si la carte aurait été très utile pour un adversaire
-      let blockBonus = 0;
-      opponentHands.forEach(oppH => {
-        const oppNew = [...oppH, card];
-        const oppTeamCounts = {};
-        oppNew.forEach(p => { const t = getTeamName(p); if (t) oppTeamCounts[t] = (oppTeamCounts[t] || 0) + 1; });
-        const wouldGiveSynergy = Object.values(oppTeamCounts).filter(c => c >= 2).length >
-          Object.values((() => { const c2 = {}; oppH.forEach(p => { const t = getTeamName(p); if (t) c2[t] = (c2[t] || 0) + 1; }); return c2; })()).filter(c => c >= 2).length;
-        if (wouldGiveSynergy) blockBonus += 0.4;
-      });
-      // Équilibre des postes
-      const posteCounts = { S: 0, M: 0, L: 0 };
-      newHand.forEach(p => { if (posteCounts[p.Poste] !== undefined) posteCounts[p.Poste]++; });
-      const posteBalance = POSTES.every(pos => posteCounts[pos] <= 3) ? 0.3 : -0.5;
-      return intrinsic + synergyBonus + blockBonus + posteBalance;
     };
 
     // ==============================
     // PLAYER CARD
     // ==============================
     const PlayerCard = ({
-      player, synergyTeams, onClick, selected, disabled,
-      isTarget, isAttacker, isJumping, canBeTargeted, size = "md", grayed = false
+      player, synergyTeams,
+      onClick, selected, disabled,
+      isTarget, isAttacker, isJumping,
+      canBeTargeted, size = "md", grayed = false
     }) => {
       if (!player) return null;
+
       const cardBaseWidth = "w-[18%]";
       const maxWidth = size === "sm" ? "max-w-[140px]" : "max-w-[180px]";
+
       const teamName = getTeamName(player);
       const isSynergy = !!teamName && synergyTeams?.has(teamName);
       const imgFolder = isSynergy ? "cartes3" : "cartes2";
+
       const offVal = synergyTeams ? effectiveOFF(player, synergyTeams) : (player.OFF ?? 0);
       const defVal = synergyTeams ? effectiveDEF(player, synergyTeams) : (player.DEF ?? 0);
+      // PRIORITÉ DES CONTOURS (violet > gold > jaune > bleu)
       const ringClass = (() => {
-        if (isSynergy) return "ring-2 md:ring-4 ring-violet-500 shadow-[0_0_22px_rgba(139,92,246,0.45)]";
-        if (isTarget || isAttacker) return "ring-2 md:ring-4 ring-orange-500 z-30 scale-105";
-        if (canBeTargeted) return "ring-2 md:ring-4 ring-yellow-400";
-        if (selected) return "ring-2 md:ring-4 ring-blue-500 z-20";
+        if (isSynergy) {
+          return "ring-2 md:ring-4 ring-violet-500 shadow-[0_0_22px_rgba(139,92,246,0.45)]";
+        }
+        if (isTarget || isAttacker) {
+          return "ring-2 md:ring-4 ring-orange-500 z-30 scale-105";
+        }
+        if (canBeTargeted) {
+          return "ring-2 md:ring-4 ring-yellow-400";
+        }
+        if (selected) {
+          return "ring-2 md:ring-4 ring-blue-500 z-20";
+        }
         return "";
       })();
       return (
@@ -459,681 +378,111 @@
             transition-all duration-300 flex-shrink-0
             ${cardBaseWidth} ${maxWidth}
             bg-slate-800 shadow-2xl card-shadow
+
             ${grayed ? "opacity-30 cursor-not-allowed grayscale" : "cursor-pointer"}
             ${ringClass}
             ${isJumping ? "animate-bounce" : ""}
           `}
         >
+          {/* Image */}
           <img
             src={`${imgFolder}/${String(player.TEAM_y || player.TEAM_x || "").trim()}_card_${player.PLAYER_ID}.png`}
             alt={player.NAME}
             className="w-full h-full object-cover"
             onError={(e) => {
               e.target.onerror = null;
-              e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${player.NAME ? player.NAME.split(",")[0] : "N/A"}`;
+              e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${
+                player.NAME ? player.NAME.split(",")[0] : "N/A"
+              }`;
             }}
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/95 to-transparent p-1 md:p-1.5 pt-3 md:pt-4 text-[7px] md:text-[9px] lg:text-[11px]">
-            <p className="font-black truncate uppercase text-white leading-none mb-1">{player.NAME ? player.NAME.split(",")[0] : "???"}</p>
+
+          {/* Overlay bas */}
+          <div className="absolute bottom-0 left-0 right-0
+                          bg-gradient-to-t from-black via-black/95 to-transparent
+                          p-1 md:p-1.5 pt-3 md:pt-4
+                          text-[7px] md:text-[9px] lg:text-[11px]">
+            <p className="font-black truncate uppercase text-white leading-none mb-1">
+              {player.NAME ? player.NAME.split(",")[0] : "???"}
+            </p>
+
             <div className="flex justify-between font-mono">
               <span className="font-bold text-orange-400">O{offVal}</span>
               <span className="font-bold text-blue-400">D{defVal}</span>
             </div>
+
           </div>
         </div>
       );
     };
-
     // ==============================
-    // DRAFT CARD (pool)
-    // ==============================
-    const DraftPoolCard = ({ player, onPick, disabled, animIn, posteColor }) => {
-      if (!player) return (
-        <div className="flex flex-col items-center gap-3 opacity-30">
-          <div className="w-full rounded-2xl bg-slate-800/40 border-2 border-dashed border-slate-700" style={{ aspectRatio: '800/1117', maxWidth: 200 }} />
-        </div>
-      );
-
-      const posteColors = {
-        S: { badge: 'bg-red-600', glow: 'rgba(239,68,68,0.35)', ring: 'ring-red-500/40', label: 'SMALL' },
-        M: { badge: 'bg-green-600', glow: 'rgba(34,197,94,0.35)', ring: 'ring-green-500/40', label: 'MEDIUM' },
-        L: { badge: 'bg-blue-600', glow: 'rgba(59,130,246,0.35)', ring: 'ring-blue-500/40', label: 'LARGE' },
-      };
-      const pc = posteColors[player.Poste] || posteColors.S;
-
-      return (
-        <div
-          className={`
-            flex flex-col items-center gap-3
-            ${animIn ? 'draft-card-in' : ''}
-            ${disabled ? 'disabled' : ''}
-          `}
-        >
-          {/* Poste badge */}
-          <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${pc.badge} text-white font-black text-[10px] uppercase tracking-widest shadow-lg`}>
-            <span>{player.Poste}</span>
-            <span className="opacity-70">·</span>
-            <span>{pc.label}</span>
-          </div>
-
-          {/* Card */}
-          <div
-            onClick={disabled ? undefined : onPick}
-            className={`
-              draft-pool-card relative rounded-2xl overflow-hidden
-              ${disabled ? 'disabled' : ''}
-              ring-2 ${pc.ring}
-            `}
-            style={{
-              width: '100%',
-              maxWidth: 200,
-              aspectRatio: '800/1117',
-              boxShadow: disabled ? 'none' : `0 8px 32px ${pc.glow}`,
-            }}
-          >
-            <img
-              src={`cartes2/${String(player.TEAM_y || player.TEAM_x || '').trim()}_card_${player.PLAYER_ID}.png`}
-              alt={player.NAME}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${(player.NAME || '').split(',')[0]}`;
-              }}
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent p-2 pt-6">
-              <p className="font-black truncate uppercase text-white text-[10px] md:text-[12px] leading-none mb-1">
-                {player.NAME ? player.NAME.split(",")[0] : "???"}
-              </p>
-              <div className="flex justify-between font-mono text-[10px]">
-                <span className="font-bold text-orange-400">OFF {player.OFF}</span>
-                <span className="font-bold text-blue-400">DEF {player.DEF}</span>
-              </div>
-              <div className="text-[9px] text-slate-400 font-bold mt-0.5 truncate">{getTeamName(player)}</div>
-            </div>
-
-            {/* Pick overlay */}
-            {!disabled && (
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-transparent hover:from-orange-500/10 hover:to-orange-600/5 transition-all flex items-center justify-center opacity-0 hover:opacity-100">
-                <div className="bg-orange-500 text-white font-black uppercase text-[11px] px-4 py-2 rounded-full shadow-2xl tracking-widest">
-                  ✓ DRAFTER
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Stats */}
-          <div className="flex items-center gap-2">
-            <span className="text-orange-400 font-black text-sm">O{player.OFF}</span>
-            <span className="text-slate-600">·</span>
-            <span className="text-blue-400 font-black text-sm">D{player.DEF}</span>
-          </div>
-        </div>
-      );
-    };
-
-    // ==============================
-    // DRAFT MINI CARD (roster)
-    // ==============================
-    const DraftMiniCard = ({ player, teamId }) => {
-    if (!player) return null;
-
-    const teamColors = [
-        'border-orange-500/40 bg-orange-500/5',
-        'border-red-500/40 bg-red-500/5',
-        'border-purple-500/40 bg-purple-500/5',
-    ];
-
-    const posteColors = {
-        S: 'bg-red-600',
-        M: 'bg-green-600',
-        L: 'bg-blue-600',
-    };
-
-    return (
-        <div
-        className={`
-            picked-bounce
-            flex items-center justify-between
-            px-3 py-2.5
-            rounded-xl border
-            ${teamColors[teamId]}
-            w-full
-        `}
-        >
-        {/* LEFT : Nom + Club */}
-        <div className="flex flex-col min-w-0">
-            <p className="font-black text-[12px] text-white truncate uppercase leading-none">
-            {(player.NAME || '').split(',')[0]}
-            </p>
-            <p className="text-[9px] text-slate-400 font-bold truncate">
-            {getTeamName(player)}
-            </p>
-        </div>
-
-        {/* CENTER : STATS PLUS GROSSES */}
-        <div className="flex items-center gap-2">
-            <div className="px-2 py-1 rounded-lg bg-orange-500/15">
-            <span className="text-[14px] font-black text-orange-400 tracking-tight">
-                O{player.OFF}
-            </span>
-            </div>
-
-            <div className="px-2 py-1 rounded-lg bg-blue-500/15">
-            <span className="text-[14px] font-black text-blue-400 tracking-tight">
-                D{player.DEF}
-            </span>
-            </div>
-        </div>
-
-        {/* RIGHT : Poste */}
-        <div
-            className={`
-            ${posteColors[player.Poste] || 'bg-slate-600'}
-            text-white font-black text-[10px]
-            px-2.5 py-0.5 rounded-md
-            flex-shrink-0
-            `}
-        >
-            {player.Poste}
-        </div>
-        </div>
-    );
-    };
-
-    // ==============================
-    // DRAFT SCREEN
-    // ==============================
-    const DraftScreen = ({ allPlayers, onDraftComplete, onBack }) => {
-      const names = ["VOUS", "IA 1", "IA 2"];
-      const teamColors = [
-        { text: 'text-orange-400', bg: 'bg-orange-500', border: 'border-orange-500/40', light: 'bg-orange-500/10' },
-        { text: 'text-red-400', bg: 'bg-red-500', border: 'border-red-500/40', light: 'bg-red-500/10' },
-        { text: 'text-purple-400', bg: 'bg-purple-500', border: 'border-purple-500/40', light: 'bg-purple-500/10' },
-      ];
-      const totalPicks = DRAFT_PICKS_PER_TEAM * 3;
-
-      // ---- STATE (minimal — toute la logique passe par les refs) ----
-      const [renderTick, setRenderTick] = useState(0); // force re-render
-      const forceRender = () => setRenderTick(t => t + 1);
-
-      // ---- REFS (source de vérité, jamais stale) ----
-      const pickedRef       = useRef([[], [], []]);
-      const remainingRef    = useRef(null);   // { S:[...], M:[...], L:[...] }
-      const poolRef         = useRef(null);   // { S: card|null, M: card|null, L: card|null }
-      const pickIndexRef    = useRef(0);
-      const busyRef         = useRef(false);  // empêche tout double-déclenchement
-      const isDoneRef       = useRef(false);
-      const draftLogRef     = useRef([]);
-      const pickingAnimRef  = useRef(null);   // poste en animation de sélection
-      const poolKeyRef      = useRef(0);      // force animation d'entrée du pool
-
-      // ---- Initialisation ----
-      useEffect(() => {
-        if (!allPlayers.length) return;
-        const byPoste = {};
-        POSTES.forEach(p => {
-          byPoste[p] = [...allPlayers.filter(c => String(c.Poste||'').trim().toUpperCase() === p)]
-            .sort(() => Math.random() - 0.5);
-        });
-        remainingRef.current = byPoste;
-        // Construire le premier pool
-        const newPool = {};
-        POSTES.forEach(p => { newPool[p] = byPoste[p]?.[0] || null; });
-        poolRef.current = newPool;
-        poolKeyRef.current += 1;
-        forceRender();
-      }, [allPlayers]);
-
-      // ---- Logique centrale : après chaque render, décider si l'IA doit jouer ----
-      useEffect(() => {
-        if (!poolRef.current || isDoneRef.current || busyRef.current) return;
-        const idx = pickIndexRef.current;
-        if (idx >= totalPicks) return;
-        const team = DRAFT_ORDER[idx];
-        if (team === 0) return; // tour humain, rien à faire
-
-        // C'est le tour d'une IA
-        busyRef.current = true;
-        const delay = 1800 + Math.random() * 1200; // 1.8s à 3.0s
-
-        const t = setTimeout(() => {
-          const pool = poolRef.current;
-          const currentPicked = pickedRef.current[team];
-          const available = POSTES.map(p => pool[p]).filter(Boolean);
-          const oppHands = [0,1,2].filter(x => x !== team).map(x => pickedRef.current[x]);
-
-          const valid = available.filter(card =>
-            currentPicked.filter(p => p.Poste === card.Poste).length < 3
-          );
-          const candidates = valid.length ? valid : available;
-
-          const best = candidates.reduce((acc, card) => {
-            const val = aiDraftValue(card, currentPicked, oppHands);
-            return val > acc.val ? { card, val } : acc;
-          }, { card: candidates[0], val: -Infinity });
-
-          executePick(best.card, team, idx);
-        }, delay);
-
-        return () => clearTimeout(t);
-      }); // PAS de tableau de deps → se re-évalue après chaque render, mais busyRef bloque les doublons
-
-      // ---- Fonction centrale de pick (synchrone sur les refs) ----
-      const executePick = (card, team, idx) => {
-        if (!card) { busyRef.current = false; return; }
-
-        // Phase 1 : animation de sélection
-        pickingAnimRef.current = card.Poste;
-        forceRender();
-
-        setTimeout(() => {
-          // Phase 2 : appliquer le pick sur les refs
-          pickingAnimRef.current = null;
-
-          // Ajouter à l'équipe
-          pickedRef.current = pickedRef.current.map((arr, tid) =>
-            tid === team ? [...arr, card] : arr
-          );
-
-          // Retirer la carte de la file et reconstruire le pool
-          const rem = { ...remainingRef.current };
-          rem[card.Poste] = rem[card.Poste].filter(c => c.PLAYER_ID !== card.PLAYER_ID);
-          remainingRef.current = rem;
-          const newPool = {};
-          POSTES.forEach(p => { newPool[p] = rem[p]?.[0] || null; });
-          poolRef.current = newPool;
-          poolKeyRef.current += 1;
-
-          // Log
-          draftLogRef.current = [
-            `${names[team]} → ${card.NAME.split(',')[0]} (${card.Poste})`,
-            ...draftLogRef.current
-          ].slice(0, 20);
-
-          // Avancer l'index
-          const nextIdx = idx + 1;
-          pickIndexRef.current = nextIdx;
-
-          if (nextIdx >= totalPicks) {
-            isDoneRef.current = true;
-          }
-
-          busyRef.current = false;
-          forceRender(); // déclenche un re-render → l'useEffect vérifiera si l'IA doit encore jouer
-        }, 650);
-      };
-
-      // ---- Clic humain ----
-      const handleHumanPick = (card) => {
-        if (busyRef.current || isDoneRef.current) return;
-        if (!card) return;
-        const idx = pickIndexRef.current;
-        if (idx >= totalPicks) return;
-        const team = DRAFT_ORDER[idx];
-        if (team !== 0) return;
-        if (pickedRef.current[0].filter(p => p.Poste === card.Poste).length >= 3) return;
-        busyRef.current = true;
-        executePick(card, 0, idx);
-      };
-
-      // Lancer la partie avec les picks
-      const handleStartGame = () => {
-        onDraftComplete(pickedRef.current);
-      };
-
-      // ---- Lecture des refs pour le rendu ----
-      const picked       = pickedRef.current;
-      const pool         = poolRef.current;
-      const currentPickIndex = pickIndexRef.current;
-      const isDone       = isDoneRef.current;
-      const draftLog     = draftLogRef.current;
-      const pickingAnim  = pickingAnimRef.current;
-      const poolKey      = poolKeyRef.current;
-      const isBusy       = busyRef.current;
-
-      const currentTeam  = currentPickIndex < totalPicks ? DRAFT_ORDER[currentPickIndex] : -1;
-      const isHumanTurn  = currentTeam === 0 && !isBusy && !isDone;
-      const postePicksLeft = (tid, poste) => 3 - picked[tid].filter(p => p.Poste === poste).length;
-      const progress     = (currentPickIndex / totalPicks) * 100;
-      const upcomingTurns = DRAFT_ORDER.slice(currentPickIndex, currentPickIndex + 6);
-
-      if (!pool) {
-        return (
-          <div className="draft-bg min-h-screen flex items-center justify-center">
-            <div className="text-slate-400 font-bold">Initialisation du draft...</div>
-          </div>
-        );
-      }
-
-      return (
-        <div className="draft-bg min-h-screen flex flex-col">
-          {/* Header */}
-          <div className="flex-shrink-0 border-b border-slate-800/80 bg-black/40 backdrop-blur px-4 py-3">
-            <div className="max-w-7xl mx-auto flex items-center gap-4 flex-wrap">
-              <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-bold text-sm flex-shrink-0">
-                <Icons.ArrowLeft /> Retour
-              </button>
-
-              <div className="flex-1 flex flex-col items-center min-w-0">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-orange-500/20 flex items-center justify-center">
-                    <Icons.Draft />
-                  </div>
-                  <span className="font-display font-black italic uppercase text-white text-lg tracking-tight">MODE DRAFT</span>
-                </div>
-                <div className="w-full max-w-xs mt-1 flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
-                  </div>
-                  <span className="text-[10px] font-black text-slate-500 whitespace-nowrap">{currentPickIndex}/{totalPicks}</span>
-                </div>
-              </div>
-
-              {!isDone && (
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest mr-1">Prochain :</span>
-                  {upcomingTurns.map((tid, i) => (
-                    <div key={i} className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-[9px] ${i === 0 ? `${teamColors[tid].bg} text-white shadow-lg ${tid === 0 ? 'active-turn-glow' : ''}` : 'bg-slate-800 text-slate-500'}`}>
-                      {tid === 0 ? 'V' : tid}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Main */}
-          <div className="flex-1 overflow-y-auto scrollbar-hide">
-          <div className="max-w-7xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-            {/* LEFT: Rosters */}
-            <div className="lg:col-span-3 space-y-4 order-2 lg:order-1">
-              {[0, 1, 2].map(tid => (
-                <div key={tid} className={`rounded-2xl border ${teamColors[tid].border} ${teamColors[tid].light} p-3`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {tid === currentTeam && !isDone && (
-                        <div className={`w-2 h-2 rounded-full ${teamColors[tid].bg} ${tid !== 0 ? 'ai-thinking' : 'active-turn-glow'}`} />
-                      )}
-                      <span className={`font-display font-black italic uppercase text-sm ${teamColors[tid].text}`}>{names[tid]}</span>
-                    </div>
-                    <span className="text-[10px] font-black text-slate-500">{picked[tid].length}/{DRAFT_PICKS_PER_TEAM}</span>
-                  </div>
-                  <div className="space-y-1">
-                    {POSTES.map(poste => {
-                      const cards = picked[tid].filter(p => p.Poste === poste);
-                      return (
-                        <div key={poste}>
-                          <div className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-0.5 flex items-center gap-1">
-                            <span className={`px-1.5 py-0.5 rounded text-white font-black text-[7px] ${poste === 'S' ? 'bg-red-600' : poste === 'M' ? 'bg-green-600' : 'bg-blue-600'}`}>{poste}</span>
-                            {Array.from({ length: 3 }).map((_, i) => (
-                              <span key={i} className={`w-1.5 h-1.5 rounded-full ${i < cards.length ? teamColors[tid].bg : 'bg-slate-800'}`} />
-                            ))}
-                          </div>
-                          {cards.map((c, i) => <DraftMiniCard key={i} player={c} teamId={tid} />)}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* CENTER */}
-            <div className="lg:col-span-6 flex flex-col items-center gap-6 order-1 lg:order-2">
-              {!isDone ? (
-                <>
-                  {/* Bannière tour */}
-                  <div className={`w-full rounded-2xl p-4 border text-center ${teamColors[currentTeam >= 0 ? currentTeam : 0]?.border || 'border-slate-700'} ${teamColors[currentTeam >= 0 ? currentTeam : 0]?.light || 'bg-slate-900/30'} ${currentTeam === 0 ? 'active-turn-glow' : ''}`}>
-                    {currentTeam === 0 ? (
-                      <>
-                        <div className="font-display font-black italic uppercase text-2xl text-white">🎯 Votre tour !</div>
-                        <div className="text-slate-400 text-[11px] font-bold mt-1">
-                          Choisissez une carte · {POSTES.map(p => `${postePicksLeft(0, p)}${p}`).join(' · ')} restants
-                        </div>
-                      </>
-                    ) : currentTeam > 0 ? (
-                      <>
-                        <div className={`font-display font-black italic uppercase text-2xl ${teamColors[currentTeam].text}`}>
-                          ⏳ {names[currentTeam]} drafte...
-                        </div>
-                        <div className="text-slate-500 text-[11px] font-bold mt-1 ai-thinking">Analyse du pool en cours</div>
-                      </>
-                    ) : null}
-                  </div>
-
-                  {/* Pool de 3 cartes */}
-                  <div key={poolKey} className="grid grid-cols-3 gap-4 w-full">
-                    {POSTES.map((poste, i) => {
-                      const card = pool[poste];
-                      const isDisabled = !isHumanTurn || !card || pickingAnim !== null
-                        || (picked[0].filter(p => p.Poste === poste).length >= 3);
-                      const isPicking = pickingAnim === poste;
-                      return (
-                        <div key={poste} className={`flex flex-col items-center ${isPicking ? 'draft-card-pick' : `draft-card-in-${i + 1}`}`}>
-                          <DraftPoolCard player={card} onPick={() => handleHumanPick(card)} disabled={isDisabled} animIn={false} />
-                          {card && currentTeam === 0 && (
-                            <div className="mt-2 flex gap-1">
-                              {Array.from({ length: 3 }).map((_, j) => (
-                                <div key={j} className={`w-2 h-2 rounded-full transition-all ${j < picked[0].filter(p => p.Poste === poste).length ? 'bg-orange-500' : 'bg-slate-700'}`} />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <div className="w-full bg-slate-900/60 border border-slate-800 rounded-2xl p-3 text-center">
-                    <p className="text-[10px] text-slate-500 font-bold">
-                      Objectif : <span className="text-white">3S + 3M + 3L</span> par équipe · Ordre serpentin ·
-                      <span className="text-yellow-400"> Victoire à {typeof window !== 'undefined' && window._basketArenaTargetScore ? window._basketArenaTargetScore : 8} pts</span>
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <div className="w-full flex flex-col items-center gap-6">
-                  <div className="text-center">
-                    <div className="font-display font-black italic uppercase text-4xl text-white mb-2">✅ Draft terminé !</div>
-                    <p className="text-slate-400 font-bold text-sm">Toutes les équipes sont constituées. Prêt à jouer ?</p>
-                  </div>
-                    {[0, 1, 2].map(tid => {
-                    const roster = picked[tid];
-                    const countByPoste = (poste) => roster.filter(p => p.Poste === poste).length;
-
-                    const posteMeta = {
-                        S: { label: 'SMALL',  accent: 'red',   border: 'border-red-500/30',   bg: 'bg-red-500/5',   text: 'text-red-300' },
-                        M: { label: 'MEDIUM', accent: 'green', border: 'border-green-500/30', bg: 'bg-green-500/5', text: 'text-green-300' },
-                        L: { label: 'LARGE',  accent: 'blue',  border: 'border-blue-500/30',  bg: 'bg-blue-500/5',  text: 'text-blue-300' },
-                    };
-
-                    return (
-                        <div
-                        key={tid}
-                        className={`
-                            w-full rounded-3xl border ${teamColors[tid].border} ${teamColors[tid].light}
-                            p-4 md:p-5
-                            shadow-[0_18px_60px_rgba(0,0,0,0.35)]
-                            backdrop-blur
-                        `}
-                        >
-                        {/* Header */}
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2">
-                            <div className={`w-9 h-9 rounded-2xl ${teamColors[tid].bg} text-white flex items-center justify-center font-black text-sm shadow-lg`}>
-                                {tid === 0 ? 'V' : tid}
-                            </div>
-                            <div>
-                                <div className={`font-display font-black italic uppercase text-lg ${teamColors[tid].text} leading-none`}>
-                                {names[tid]}
-                                </div>
-                                <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-0.5">
-                                Roster final
-                                </div>
-                            </div>
-                            </div>
-
-                            <div className="px-3 py-1 rounded-2xl bg-black/30 border border-slate-800 text-[10px] font-black text-slate-300">
-                            {roster.length}/{DRAFT_PICKS_PER_TEAM}
-                            </div>
-                        </div>
-
-                        {/* Columns */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            {POSTES.map((poste) => {
-                            const meta = posteMeta[poste];
-                            const list = roster.filter(p => p.Poste === poste);
-
-                            return (
-                                <div
-                                key={poste}
-                                className={`
-                                    rounded-2xl border ${meta.border} ${meta.bg}
-                                    p-3
-                                    shadow-inner
-                                `}
-                                >
-                                {/* Poste header */}
-                                <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                    <span className={`px-2 py-1 rounded-lg bg-${meta.accent}-600 text-white font-black text-[10px]`}>
-                                        {poste}
-                                    </span>
-                                    <span className={`text-[10px] font-black uppercase tracking-widest ${meta.text}`}>
-                                        {meta.label}
-                                    </span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                    {Array.from({ length: 3 }).map((_, i) => (
-                                        <span
-                                        key={i}
-                                        className={`w-2 h-2 rounded-full ${i < countByPoste(poste) ? `bg-${meta.accent}-500` : 'bg-slate-800'}`}
-                                        />
-                                    ))}
-                                    </div>
-                                </div>
-
-                                {/* Players */}
-                                <div className="space-y-2">
-                                    {list.map((c, i) => (
-                                    <div
-                                        key={i}
-                                        className="
-                                        flex items-center justify-between gap-2
-                                        px-3 py-2 rounded-xl
-                                        bg-slate-950/40 border border-slate-800/70
-                                        hover:border-orange-500/30 transition-colors
-                                        "
-                                    >
-                                        <div className="min-w-0">
-                                        <div className="text-[11px] font-black text-white truncate uppercase leading-none">
-                                            {c.NAME.split(',')[0]}
-                                        </div>
-                                        <div className="text-[9px] text-slate-500 font-bold truncate">
-                                            {getTeamName(c)}
-                                        </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                                        <span className="px-2 py-1 rounded-lg bg-orange-500/15 text-orange-300 font-black text-[12px]">
-                                            O{c.OFF}
-                                        </span>
-                                        <span className="px-2 py-1 rounded-lg bg-blue-500/15 text-blue-300 font-black text-[12px]">
-                                            D{c.DEF}
-                                        </span>
-                                        </div>
-                                    </div>
-                                    ))}
-
-                                    {list.length === 0 && (
-                                    <div className="text-[10px] text-slate-600 font-bold text-center py-4">
-                                        Aucun joueur
-                                    </div>
-                                    )}
-                                </div>
-                                </div>
-                            );
-                            })}
-                        </div>
-                        </div>
-                    );
-                })}
-                  <button onClick={handleStartGame} className="home-btn w-full max-w-sm bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white py-5 rounded-2xl font-display font-black text-2xl italic uppercase tracking-wider shadow-2xl pulse-glow flex items-center justify-center gap-3">
-                    <Icons.Play /> LANCER LE MATCH
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* RIGHT: Log */}
-            <div className="lg:col-span-3 order-3">
-              <div className="bg-black/50 backdrop-blur rounded-3xl p-4 border border-slate-800 h-fit max-h-[500px] overflow-hidden flex flex-col">
-                <div className="flex items-center gap-2 mb-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                  <Icons.History /> Historique du draft
-                </div>
-                <div className="overflow-y-auto flex-1 space-y-1.5 pr-1 scrollbar-hide">
-                  {draftLog.length === 0 ? (
-                    <div className="text-slate-600 text-[10px] font-bold text-center py-4">En attente du premier pick...</div>
-                  ) : draftLog.map((log, i) => {
-                    const teamName = log.split(' → ')[0];
-                    const tid = names.indexOf(teamName);
-                    return (
-                      <div key={i} className={`slide-right p-2 rounded-xl text-[10px] font-bold leading-snug ${i === 0 ? `${teamColors[tid >= 0 ? tid : 0].light} border ${teamColors[tid >= 0 ? tid : 0].border} ${teamColors[tid >= 0 ? tid : 0].text}` : 'bg-slate-800/30 text-slate-500'}`}>
-                        {log}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-          </div>
-          </div>
-        </div>
-      );
-    };
-
-    // ==============================
-    // ROLE DRAW MODAL
+    // RoleDrawModal (tirage au sort attaque/défense/pause)
     // ==============================
     const RoleDrawModal = ({ open, tick, phase, result, onSkip }) => {
       if (!open) return null;
+
       const names = ["VOUS", "IA 1", "IA 2"];
+
+      // pendant le spin : on “fait défiler” en offsetant avec tick
       const spinningName = (offset) => names[(tick + offset) % 3];
+
       const attackerLabel = phase === "SPIN" ? spinningName(0) : names[result.attacker];
       const defenderLabel = phase === "SPIN" ? spinningName(1) : names[result.defender];
       const pausedLabel   = phase === "SPIN" ? spinningName(2) : names[result.paused];
+
       const Box = ({ title, value, accent }) => (
         <div className={`rounded-3xl border p-5 text-center bg-slate-950/60 shadow-2xl ${accent}`}>
           <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{title}</div>
-          <div className={`mt-3 font-display font-black italic uppercase text-3xl md:text-4xl ${phase === "SPIN" ? "opacity-80" : ""}`}>{value}</div>
-          {phase === "SPIN" && <div className="mt-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tirage en cours...</div>}
+          <div className={`mt-3 font-display font-black italic uppercase text-3xl md:text-4xl ${phase === "SPIN" ? "opacity-80" : ""}`}>
+            {value}
+          </div>
+          {phase === "SPIN" && (
+            <div className="mt-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              Tirage en cours...
+            </div>
+          )}
         </div>
       );
+
       return (
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
           <div className="relative w-full max-w-3xl rounded-3xl border border-orange-500/25 bg-slate-950 shadow-2xl overflow-hidden">
             <div className="p-6 md:p-8">
               <div className="text-center mb-6">
-                <div className="font-display font-black italic uppercase text-3xl md:text-4xl text-white">🎲 Tirage au sort</div>
-                <div className="text-slate-400 text-sm font-bold mt-2">Qui attaque ? Qui défend ? Qui est en pause ?</div>
+                <div className="font-display font-black italic uppercase text-3xl md:text-4xl text-white">
+                  🎲 Tirage au sort
+                </div>
+                <div className="text-slate-400 text-sm font-bold mt-2">
+                  Qui attaque ? Qui défend ? Qui est en pause ?
+                </div>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Box title="ATTAQUE" value={attackerLabel} accent="border-yellow-500/30" />
                 <Box title="DÉFENSE" value={defenderLabel} accent="border-slate-400/30" />
                 <Box title="PAUSE" value={pausedLabel} accent="border-blue-500/30" />
               </div>
+
               <div className="mt-6 flex items-center justify-center gap-3">
                 {phase === "SPIN" ? (
-                  <div className="text-slate-500 text-xs font-black uppercase tracking-widest">Attribution des rôles...</div>
+                  <div className="text-slate-500 text-xs font-black uppercase tracking-widest">
+                    Attribution des rôles...
+                  </div>
                 ) : (
-                  <div className="text-green-400 text-xs font-black uppercase tracking-widest">Rôles attribués ✅</div>
+                  <div className="text-green-400 text-xs font-black uppercase tracking-widest">
+                    Rôles attribués ✅
+                  </div>
                 )}
               </div>
+
+              {/* Option “skip” si tu veux debug, sinon tu peux enlever */}
               <div className="mt-6 flex justify-center">
-                <button onClick={onSkip} className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black uppercase text-xs">
-                  Ignorer l'animation
+                <button
+                  onClick={onSkip}
+                  className="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black uppercase text-xs"
+                >
+                  Ignorer l’animation
                 </button>
               </div>
             </div>
@@ -1141,58 +490,71 @@
         </div>
       );
     };
-
     // ==============================
-    // SCORE SELECT MODAL
+    // SCORE SELECT MODAL (- 8 +)
     // ==============================
-    const ScoreSelectModal = ({ value, onDec, onInc, onCancel, onConfirm, mode, setMode }) => (
+    const ScoreSelectModal = ({ value, onDec, onInc, onCancel, onConfirm }) => (
       <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
         <div onClick={onCancel} className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+
         <div className="relative w-full max-w-md rounded-3xl border border-orange-500/30 bg-slate-950 shadow-2xl overflow-hidden">
           <div className="p-6 text-center">
             <div className="w-16 h-16 rounded-2xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center mx-auto mb-4">
               <Icons.Trophy size={28} />
             </div>
-            <h3 className="font-display font-black text-2xl md:text-3xl italic uppercase text-white">Nouvelle Partie</h3>
 
-            {/* Mode selection */}
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <h3 className="font-display font-black text-2xl md:text-3xl italic uppercase text-white">
+              Score de victoire
+            </h3>
+            <p className="text-slate-400 text-sm font-bold mt-2">
+              Choisis entre 6 et 10 points
+            </p>
+
+            {/* - 8 + en gros */}
+            <div className="mt-6 flex items-center justify-center gap-6">
               <button
-                onClick={() => setMode('classic')}
-                className={`py-3 rounded-2xl border font-black uppercase text-sm transition-all ${mode === 'classic' ? 'bg-orange-600 border-orange-500 text-white shadow-xl' : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'}`}
+                onClick={onDec}
+                className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-700 hover:border-orange-500/60 hover:bg-slate-800 transition-all font-black text-3xl"
+                aria-label="Moins"
               >
-                🎲 Classique
+                -
               </button>
-              <button
-                onClick={() => setMode('draft')}
-                className={`py-3 rounded-2xl border font-black uppercase text-sm transition-all ${mode === 'draft' ? 'bg-purple-700 border-purple-500 text-white shadow-xl' : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'}`}
-              >
-                ✦ Draft
-              </button>
-            </div>
 
-
-            <p className="text-slate-400 text-sm font-bold mt-5 mb-2">Score de victoire (6–10)</p>
-            <div className="flex items-center justify-center gap-6">
-              <button onClick={onDec} className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-700 hover:border-orange-500/60 hover:bg-slate-800 transition-all font-black text-3xl">-</button>
-              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-orange-500 to-yellow-500 text-black flex items-center justify-center shadow-[0_0_45px_rgba(249,115,22,0.35)] border-4 border-white/20">
-                <span className="font-display font-black italic text-5xl leading-none">{value}</span>
+              <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-orange-500 to-yellow-500 text-black flex items-center justify-center shadow-[0_0_45px_rgba(249,115,22,0.35)] border-4 border-white/20">
+                <span className="font-display font-black italic text-6xl leading-none">
+                  {value}
+                </span>
               </div>
-              <button onClick={onInc} className="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-700 hover:border-orange-500/60 hover:bg-slate-800 transition-all font-black text-3xl">+</button>
+
+              <button
+                onClick={onInc}
+                className="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-700 hover:border-orange-500/60 hover:bg-slate-800 transition-all font-black text-3xl"
+                aria-label="Plus"
+              >
+                +
+              </button>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button onClick={onCancel} className="py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black uppercase text-sm">Annuler</button>
+            <div className="mt-8 grid grid-cols-2 gap-3">
+              <button
+                onClick={onCancel}
+                className="py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black uppercase text-sm"
+              >
+                Annuler
+              </button>
               <button
                 onClick={onConfirm}
-                className={`py-3 rounded-2xl text-white font-black uppercase text-sm shadow-xl ${mode === 'draft' ? 'bg-purple-700 hover:bg-purple-600' : 'bg-orange-600 hover:bg-orange-500'}`}
+                className="py-3 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white font-black uppercase text-sm shadow-xl"
               >
-                {mode === 'draft' ? '✦ Démarrer Draft' : 'Jouer'}
+                Confirmer
               </button>
             </div>
           </div>
+
           <div className="px-6 py-4 border-t border-slate-800 bg-slate-950/60 text-center">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Premier à {value} points gagne</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+              Premier à {value} points gagne
+            </p>
           </div>
         </div>
       </div>
@@ -1201,62 +563,109 @@
     // ==============================
     // HOME SCREEN
     // ==============================
-    const HomeScreen = ({ onStartGame, onRules, onCards, targetScore, setTargetScore, showScoreModal, setShowScoreModal, gameMode, setGameMode }) => (
-      <div className="home-bg min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-orange-500/5 blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-yellow-500/5 blur-3xl" />
-          <div className="absolute top-0 left-1/2 w-px h-full bg-gradient-to-b from-transparent via-orange-500/10 to-transparent" />
-        </div>
-
-        <div className="fade-in-up text-center mb-12 relative z-10">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="w-28 h-28 md:w-32 md:h-32 rounded-3xl flex items-center justify-center bg-gradient-to-br from-slate-900 via-black to-slate-950 border border-orange-500/40 shadow-[0_0_55px_rgba(249,115,22,0.35)]">
-              <BasketLogo size={72} className="object-contain drop-shadow-[0_4px_14px_rgba(0,0,0,0.75)]" />
-            </div>
+    const HomeScreen = ({ onStartGame, onRules, onCards, targetScore, setTargetScore, showScoreModal, setShowScoreModal }) => {
+      return (
+        <div className="home-bg min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-orange-500/5 blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-yellow-500/5 blur-3xl" />
+            {/* Decorative lines */}
+            <div className="absolute top-0 left-1/2 w-px h-full bg-gradient-to-b from-transparent via-orange-500/10 to-transparent" />
           </div>
-          <h1 className="font-display text-7xl md:text-9xl font-black italic uppercase leading-none tracking-tighter text-white"
-            style={{ textShadow: "0 0 60px rgba(249,115,22,0.4), 0 4px 0 rgba(0,0,0,0.5)" }}>BASKET</h1>
-          <h2 className="font-display text-4xl md:text-6xl font-black italic uppercase leading-none tracking-tighter"
-            style={{ background: "linear-gradient(135deg, #f97316, #eab308)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>ARENA</h2>
-          <p className="text-slate-500 font-display text-lg uppercase tracking-[0.3em] mt-3 font-bold">BY GPAIN1999</p>
+
+          {/* Logo */}
+          <div className="fade-in-up text-center mb-12 relative z-10">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div
+                className="
+                  w-28 h-28 md:w-32 md:h-32
+                  rounded-3xl
+                  flex items-center justify-center
+                  bg-gradient-to-br from-slate-900 via-black to-slate-950
+                  border border-orange-500/40
+                  shadow-[0_0_55px_rgba(249,115,22,0.35)]
+                "
+              >
+                <BasketLogo
+                  size={72}
+                  className="object-contain drop-shadow-[0_4px_14px_rgba(0,0,0,0.75)]"
+                />
+              </div>
+            </div>
+
+            <h1
+              className="font-display text-7xl md:text-9xl font-black italic uppercase leading-none tracking-tighter text-white"
+              style={{
+                textShadow: "0 0 60px rgba(249,115,22,0.4), 0 4px 0 rgba(0,0,0,0.5)",
+              }}
+            >
+              BASKET
+            </h1>
+
+            <h2
+              className="font-display text-4xl md:text-6xl font-black italic uppercase leading-none tracking-tighter"
+              style={{
+                background: "linear-gradient(135deg, #f97316, #eab308)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              ARENA
+            </h2>
+
+            <p className="text-slate-500 font-display text-lg uppercase tracking-[0.3em] mt-3 font-bold">
+              BY GPAIN1999
+            </p>
+          </div>
+
+          {/* Buttons */}
+          <div className="relative z-10 w-full max-w-sm space-y-4">
+            <button
+              onClick={() => setShowScoreModal(true)}
+              className="home-btn w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white py-5 rounded-2xl font-display font-black text-2xl italic uppercase tracking-wider shadow-2xl pulse-glow flex items-center justify-center gap-3 fade-in-up-1"
+            >
+              <Icons.Play />
+              JOUER
+            </button>
+
+            <button
+              onClick={onRules}
+              className="home-btn w-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-500 text-white py-4 rounded-2xl font-display font-black text-xl italic uppercase tracking-wider shadow-xl flex items-center justify-center gap-3 fade-in-up-2"
+            >
+              <Icons.Book />
+              RÈGLES DU JEU
+            </button>
+
+            <button
+              onClick={onCards}
+              className="home-btn w-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-500 text-white py-4 rounded-2xl font-display font-black text-xl italic uppercase tracking-wider shadow-xl flex items-center justify-center gap-3 fade-in-up-3"
+            >
+              <Icons.Cards />
+              TOUTES LES CARTES
+            </button>
+          </div>
+
+          {/* Footer */}
+          <p className="absolute bottom-6 text-slate-700 text-xs font-bold uppercase tracking-widest fade-in-up-4">
+            Premier à {targetScore} points remporte la partie
+          </p>
+
+          {showScoreModal && (
+            <ScoreSelectModal
+              value={targetScore}
+              onDec={() => setTargetScore(v => Math.max(6, v - 1))}
+              onInc={() => setTargetScore(v => Math.min(10, v + 1))}
+              onCancel={() => setShowScoreModal(false)}
+              onConfirm={() => { setShowScoreModal(false); onStartGame(); }}
+            />
+          )}
         </div>
-
-        <div className="relative z-10 w-full max-w-sm space-y-4">
-          <button onClick={() => setShowScoreModal(true)}
-            className="home-btn w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white py-5 rounded-2xl font-display font-black text-2xl italic uppercase tracking-wider shadow-2xl pulse-glow flex items-center justify-center gap-3 fade-in-up-1">
-            <Icons.Play /> JOUER
-          </button>
-          <button onClick={onRules}
-            className="home-btn w-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-500 text-white py-4 rounded-2xl font-display font-black text-xl italic uppercase tracking-wider shadow-xl flex items-center justify-center gap-3 fade-in-up-2">
-            <Icons.Book /> RÈGLES DU JEU
-          </button>
-          <button onClick={onCards}
-            className="home-btn w-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-500 text-white py-4 rounded-2xl font-display font-black text-xl italic uppercase tracking-wider shadow-xl flex items-center justify-center gap-3 fade-in-up-3">
-            <Icons.Cards /> TOUTES LES CARTES
-          </button>
-        </div>
-
-        <p className="absolute bottom-6 text-slate-700 text-xs font-bold uppercase tracking-widest fade-in-up-4">
-          Premier à {targetScore} points remporte la partie
-        </p>
-
-        {showScoreModal && (
-          <ScoreSelectModal
-            value={targetScore}
-            onDec={() => setTargetScore(v => Math.max(6, v - 1))}
-            onInc={() => setTargetScore(v => Math.min(10, v + 1))}
-            onCancel={() => setShowScoreModal(false)}
-            onConfirm={() => { setShowScoreModal(false); onStartGame(); }}
-            mode={gameMode}
-            setMode={setGameMode}
-          />
-        )}
-      </div>
-    );
+      );
+    };
 
     // ==============================
-    // OVERLAY MODAL
+    // MODAL WRAPPER (pour règles/cartes depuis le jeu)
     // ==============================
     const OverlayModal = ({ onClose, children }) => (
       <div className="fixed inset-0 z-[900] flex flex-col">
@@ -1271,21 +680,39 @@
     // RULES SCREEN
     // ==============================
     const RulesScreen = ({ onBack, backLabel, targetScore = 8 }) => {
+      const [section, setSection] = useState('all');
+
       const RuleBlock = ({ icon, title, color, borderColor, children }) => (
-        <div className="rule-section mb-6" style={{ borderColor }}>
+        <div className={`rule-section mb-6`} style={{ borderColor }}>
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xl">{icon}</span>
-            <h3 className="font-display font-black text-xl italic uppercase" style={{ color }}>{title}</h3>
+            <h3 className={`font-display font-black text-xl italic uppercase`} style={{ color }}>{title}</h3>
           </div>
-          <div className="text-slate-300 text-sm leading-relaxed space-y-2">{children}</div>
+          <div className="text-slate-300 text-sm leading-relaxed space-y-2">
+            {children}
+          </div>
         </div>
       );
+
       const Tag = ({ color = 'orange', children }) => {
-        const colors = { orange:'bg-orange-500/20 text-orange-300 border-orange-500/30', yellow:'bg-yellow-500/20 text-yellow-300 border-yellow-500/30', blue:'bg-blue-500/20 text-blue-300 border-blue-500/30', green:'bg-green-500/20 text-green-300 border-green-500/30', red:'bg-red-500/20 text-red-300 border-red-500/30', slate:'bg-slate-500/20 text-slate-300 border-slate-500/30' };
-        return <span className={`inline-block px-2 py-0.5 rounded text-xs font-black border ${colors[color]} mr-1`}>{children}</span>;
+        const colors = {
+          orange: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+          yellow: 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
+          blue: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+          green: 'bg-green-500/20 text-green-300 border-green-500/30',
+          red: 'bg-red-500/20 text-red-300 border-red-500/30',
+          slate: 'bg-slate-500/20 text-slate-300 border-slate-500/30',
+        };
+        return (
+          <span className={`inline-block px-2 py-0.5 rounded text-xs font-black border ${colors[color]} mr-1`}>
+            {children}
+          </span>
+        );
       };
+
       return (
         <div className="min-h-0 flex flex-col flex-1 overflow-hidden bg-slate-950">
+          {/* Header */}
           <div className="flex-shrink-0 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-4 py-4">
             <div className="max-w-3xl mx-auto flex items-center gap-4">
               <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-bold text-sm">
@@ -1297,12 +724,19 @@
               <div className="w-16" />
             </div>
           </div>
+
           <div className="flex-1 overflow-y-auto scrollbar-hide">
           <div className="max-w-3xl mx-auto p-4 md:p-8 pb-16">
+
+            {/* Objective Banner */}
             <div className="bg-gradient-to-r from-orange-600/20 to-yellow-500/10 border border-orange-500/30 rounded-2xl p-5 mb-8 text-center">
               <div className="font-display font-black text-4xl italic text-white mb-1">PREMIER À {targetScore} POINTS</div>
               <p className="text-orange-300 text-sm font-bold uppercase tracking-widest">= Vainqueur de la partie</p>
+              <p className="text-slate-400 text-xs font-bold mt-3">
+                ⚙️ Avant le match, tu peux choisir la condition de victoire entre <span className="text-white">6</span> et <span className="text-white">10</span> (par défaut <span className="text-white">8</span>).
+              </p>
             </div>
+
             {/* SECTION 1 : Vue d'ensemble */}
             <RuleBlock icon="🏀" title="Vue d'ensemble" color="#f97316" borderColor="#f97316">
               <p>
@@ -1530,15 +964,6 @@
               </div>
             </RuleBlock>
 
-            <RuleBlock icon="✦" title="Mode Draft (NOUVEAU)" color="#a855f7" borderColor="#a855f7">
-              <p>En mode <strong className="text-white">Draft</strong>, les 3 équipes choisissent leurs joueurs à tour de rôle depuis un pool commun, au lieu d'une distribution aléatoire.</p>
-              <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 mt-3 space-y-2">
-                <p className="text-slate-300 text-sm">🐍 <strong className="text-white">Ordre serpentin</strong> : VOUS → IA1 → IA2 → IA2 → IA1 → VOUS → ...</p>
-                <p className="text-slate-300 text-sm">🃏 A chaque tour, <strong className="text-white">3 cartes</strong> sont proposées (1S + 1M + 1L). Vous en choisissez une.</p>
-                <p className="text-slate-300 text-sm">🎯 Objectif : constituer <strong className="text-white">3S + 3M + 3L</strong> pour votre roster.</p>
-                <p className="text-slate-300 text-sm">🤖 Les IA draftent de manière <strong className="text-white">intelligente</strong> : elles évaluent la valeur de chaque carte, les synergies potentielles et peuvent <strong className="text-white">bloquer vos picks</strong> stratégiques.</p>
-              </div>
-            </RuleBlock>
             {/* SECTION 9 : IA */}
             <RuleBlock icon="🤖" title="L'Intelligence Artificielle" color="#94a3b8" borderColor="#94a3b8">
               <p>
@@ -1577,6 +1002,7 @@
               </div>
             </RuleBlock>
 
+            {/* Back button */}
             <button onClick={onBack} className="w-full mt-4 py-4 bg-slate-800 hover:bg-slate-700 rounded-2xl font-display font-black text-lg italic uppercase text-white flex items-center justify-center gap-2 transition-all">
               <Icons.ArrowLeft /> {backLabel || 'Retour au menu'}
             </button>
@@ -1591,17 +1017,32 @@
     // ==============================
     const CardsScreen = ({ allPlayers, onBack, backLabel }) => {
       const [selectedTeam, setSelectedTeam] = useState(null);
-      const [zoomedCard, setZoomedCard] = useState(null);
+
       const teams = [...new Set(allPlayers.map(p => String(p.TEAM_y || p.TEAM_x || '').trim()).filter(Boolean))].sort();
-      const teamPlayers = selectedTeam ? allPlayers.filter(p => String(p.TEAM_y || p.TEAM_x || '').trim() === selectedTeam) : [];
+
+      const teamPlayers = selectedTeam
+        ? allPlayers.filter(p => String(p.TEAM_y || p.TEAM_x || '').trim() === selectedTeam)
+        : [];
+
       const byPoste = (poste) => teamPlayers.filter(p => String(p.Poste || '').trim().toUpperCase() === poste);
 
+      const [zoomedCard, setZoomedCard] = useState(null);
+
       const MiniCard = ({ player }) => (
-        <div onClick={() => setZoomedCard(player)} style={{ aspectRatio: '800/1117' }}
-          className="relative rounded-lg overflow-hidden bg-slate-800 shadow-xl hover:scale-105 hover:shadow-orange-500/20 transition-all cursor-pointer">
-          <img src={`cartes2/${String(player.TEAM_y || player.TEAM_x || '').trim()}_card_${player.PLAYER_ID}.png`} alt={player.NAME}
+        <div
+          onClick={() => setZoomedCard(player)}
+          style={{ aspectRatio: '800/1117' }}
+          className="relative rounded-lg overflow-hidden bg-slate-800 shadow-xl hover:scale-105 hover:shadow-orange-500/20 transition-all cursor-pointer"
+        >
+          <img
+            src={`cartes2/${String(player.TEAM_y || player.TEAM_x || '').trim()}_card_${player.PLAYER_ID}.png`}
+            alt={player.NAME}
             className="w-full h-full object-cover"
-            onError={(e) => { e.target.onerror = null; e.target.src = `https://via.placeholder.com/400x560/1e293b/ffffff?text=${(player.NAME || '').split(',')[0]}`; }} />
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = `https://via.placeholder.com/400x560/1e293b/ffffff?text=${(player.NAME || '').split(',')[0]}`;
+            }}
+          />
         </div>
       );
 
@@ -1613,70 +1054,107 @@
                 <Icons.ArrowLeft /> {selectedTeam ? 'Équipes' : (backLabel || 'Menu')}
               </button>
               <div className="flex-1 text-center">
-                <h1 className="font-display font-black text-2xl italic uppercase text-white">{selectedTeam ? selectedTeam : 'Toutes les Cartes'}</h1>
-                {!selectedTeam && <p className="text-slate-500 text-xs font-bold">{allPlayers.length} cartes · {teams.length} équipes</p>}
+                <h1 className="font-display font-black text-2xl italic uppercase text-white">
+                  {selectedTeam ? selectedTeam : 'Toutes les Cartes'}
+                </h1>
+                {!selectedTeam && (
+                  <p className="text-slate-500 text-xs font-bold">{allPlayers.length} cartes · {teams.length} équipes</p>
+                )}
               </div>
               <div className="w-20" />
             </div>
           </div>
+
           <div className="flex-1 overflow-y-auto scrollbar-hide">
+
           {!selectedTeam ? (
+            // Team selection grid
             <div className="max-w-6xl mx-auto p-4 md:p-8">
+              <p className="text-slate-500 text-sm text-center mb-6 font-bold">Sélectionnez une équipe pour voir ses cartes</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {teams.map(team => {
                   const count = allPlayers.filter(p => String(p.TEAM_y || p.TEAM_x || '').trim() === team).length;
                   return (
-                    <button key={team} onClick={() => setSelectedTeam(team)}
-                      className="team-card-btn bg-slate-900 border border-slate-700 hover:border-orange-500/60 rounded-2xl p-4 text-center group">
+                    <button
+                      key={team}
+                      onClick={() => setSelectedTeam(team)}
+                      className="team-card-btn bg-slate-900 border border-slate-700 hover:border-orange-500/60 rounded-2xl p-4 text-center group"
+                    >
                       <div className="w-12 h-12 flex items-center justify-center mx-auto mb-3">
-                        <img src={`logo/${team}.png`} alt={team} className="w-12 h-12 object-contain"
-                          onError={(e) => { e.target.onerror = null; e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
-                        <div style={{display:'none'}} className="w-12 h-12 bg-gradient-to-br from-orange-600/20 to-orange-800/20 border border-orange-500/20 rounded-xl items-center justify-center">
+                        <img
+                          src={`logo/${team}.png`}
+                          alt={team}
+                          className="w-12 h-12 object-contain"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                        <div style={{display:'none'}} className="w-12 h-12 bg-gradient-to-br from-orange-600/20 to-orange-800/20 border border-orange-500/20 rounded-xl items-center justify-center group-hover:border-orange-500/50 transition-all">
                           <BasketLogo size={24} className="text-orange-500" />
                         </div>
                       </div>
                       <div className="font-display font-black text-sm italic uppercase text-white leading-tight">{team}</div>
                       <div className="text-slate-500 text-xs font-bold mt-1">{count} cartes</div>
+                      <div className="flex items-center justify-center gap-1 mt-2 text-slate-600 group-hover:text-orange-400 transition-colors">
+                        <Icons.ChevronRight />
+                      </div>
                     </button>
                   );
                 })}
               </div>
             </div>
           ) : (
+            // Cards by poste (3 columns)
             <div className="max-w-6xl mx-auto p-4 md:p-8">
               <div className="grid grid-cols-3 gap-6 md:gap-8">
                 {POSTES.map(poste => {
                   const cards = byPoste(poste);
                   const posteColors = {
-                    S: { bg:'from-red-900/30 to-red-950/20', border:'border-red-500/30', badge:'bg-red-600' },
-                    M: { bg:'from-green-900/30 to-green-950/20', border:'border-green-500/30', badge:'bg-green-600' },
-                    L: { bg:'from-blue-900/30 to-blue-950/20', border:'border-blue-500/30', badge:'bg-blue-600' },
+                    S: { bg: 'from-red-900/30 to-red-950/20', border: 'border-red-500/30', badge: 'bg-red-600' },
+                    M: { bg: 'from-green-900/30 to-green-950/20', border: 'border-green-500/30', badge: 'bg-green-600' },
+                    L: { bg: 'from-blue-900/30 to-blue-950/20', border: 'border-blue-500/30', badge: 'bg-blue-600' },
                   };
                   const c = posteColors[poste];
                   return (
                     <div key={poste} className={`rounded-2xl bg-gradient-to-b ${c.bg} border ${c.border} overflow-hidden`}>
                       <div className={`p-3 md:p-4 border-b ${c.border} flex items-center justify-center`}>
-                        <div className={`${c.badge} text-white font-black text-lg md:text-xl w-10 h-10 rounded-xl flex items-center justify-center`}>{poste}</div>
+                        <div className={`${c.badge} text-white font-black text-lg md:text-xl w-10 h-10 rounded-xl flex items-center justify-center`}>
+                          {poste}
+                        </div>
                       </div>
                       <div className="p-2 md:p-3 space-y-3">
-                        {cards.length === 0 ? <div className="text-slate-600 text-xs text-center py-4">Aucune carte</div> :
-                          cards.map(player => <MiniCard key={player.PLAYER_ID} player={player} />)}
+                        {cards.length === 0 ? (
+                          <div className="text-slate-600 text-xs text-center py-4">Aucune carte</div>
+                        ) : (
+                          cards.map(player => <MiniCard key={player.PLAYER_ID} player={player} />)
+                        )}
                       </div>
                     </div>
                   );
                 })}
               </div>
+
+              <button onClick={() => setSelectedTeam(null)} className="w-full mt-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-2xl font-display font-black text-lg italic uppercase text-white flex items-center justify-center gap-2 transition-all">
+                <Icons.ArrowLeft /> Autres équipes
+              </button>
             </div>
           )}
           </div>
+
+          {/* Popup carte zoomée */}
           {zoomedCard && (
             <div className="fixed inset-0 z-[999] flex items-center justify-center p-4" onClick={() => setZoomedCard(null)}>
               <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
               <div className="relative flex flex-col items-center gap-4" onClick={e => e.stopPropagation()}>
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl" style={{ width: 'min(80vw, 320px)', aspectRatio: '800/1117' }}>
-                  <img src={`cartes2/${String(zoomedCard.TEAM_y || zoomedCard.TEAM_x || '').trim()}_card_${zoomedCard.PLAYER_ID}.png`} alt={zoomedCard.NAME}
+                  <img
+                    src={`cartes2/${String(zoomedCard.TEAM_y || zoomedCard.TEAM_x || '').trim()}_card_${zoomedCard.PLAYER_ID}.png`}
+                    alt={zoomedCard.NAME}
                     className="w-full h-full object-cover"
-                    onError={(e) => { e.target.onerror = null; e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${(zoomedCard.NAME || '').split(',')[0]}`; }} />
+                    onError={(e) => { e.target.onerror = null; e.target.src = `https://via.placeholder.com/800x1117/1e293b/ffffff?text=${(zoomedCard.NAME || '').split(',')[0]}`; }}
+                  />
                 </div>
                 <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-700 rounded-2xl px-5 py-3">
                   <span className="bg-yellow-500 text-black font-black text-sm px-2 py-0.5 rounded-lg">{zoomedCard.Poste}</span>
@@ -1684,7 +1162,9 @@
                   <span className="text-orange-400 font-black text-sm">O{zoomedCard.OFF}</span>
                   <span className="text-blue-400 font-black text-sm">D{zoomedCard.DEF}</span>
                 </div>
-                <button onClick={() => setZoomedCard(null)} className="text-slate-400 hover:text-white text-sm font-bold uppercase tracking-widest transition-colors">✕ Fermer</button>
+                <button onClick={() => setZoomedCard(null)} className="text-slate-400 hover:text-white text-sm font-bold uppercase tracking-widest transition-colors">
+                  ✕ Fermer
+                </button>
               </div>
             </div>
           )}
@@ -1696,7 +1176,7 @@
     // MAIN APP
     // ==============================
     function App() {
-      const [appScreen, setAppScreen] = useState('LOADING');
+      const [appScreen, setAppScreen] = useState('LOADING'); // LOADING, HOME, RULES, CARDS, GAME
       const [allPlayers, setAllPlayers] = useState([]);
       const [gameState, setGameState] = useState(GAME_STATES.PREGAME);
       const [phase, setPhase] = useState(PHASES.IDLE);
@@ -1717,17 +1197,15 @@
       const [showStatsModal, setShowStatsModal] = useState(false);
       const [stats, setStats] = useState([{}, {}, {}]);
       const [pregameError, setPregameError] = useState(null);
-      const [overlay, setOverlay] = useState(null);
+      const [overlay, setOverlay] = useState(null); // 'RULES' | 'CARDS' | null
+      // 🎲 Tirage au sort des rôles
       const [showRoleDraw, setShowRoleDraw] = useState(false);
-      const [roleDrawPhase, setRoleDrawPhase] = useState("SPIN");
-      const [roleDrawResult, setRoleDrawResult] = useState(null);
-      const [roleDrawTick, setRoleDrawTick] = useState(0);
+      const [roleDrawPhase, setRoleDrawPhase] = useState("SPIN"); // SPIN | REVEAL
+      const [roleDrawResult, setRoleDrawResult] = useState(null); // { attacker, defender, paused }
+      const [roleDrawTick, setRoleDrawTick] = useState(0);        // pour faire défiler l'affichage
+      // ✅ SCORE DE VICTOIRE (6..10) + popup " - 8 + "
       const [targetScore, setTargetScore] = useState(8);
       const [showScoreModal, setShowScoreModal] = useState(false);
-      const [gameMode, setGameMode] = useState('classic'); // 'classic' | 'draft'
-
-      // Expose targetScore for DraftScreen
-      if (typeof window !== 'undefined') window._basketArenaTargetScore = targetScore;
 
       const playerKey = (p) => String(p?.PLAYER_ID ?? "");
 
@@ -1760,6 +1238,7 @@
 
       const addLog = (msg) => setLogs(prev => [msg, ...prev].slice(0, 30));
 
+      // ✅ FIN DE PARTIE : dès que quelqu'un atteint targetScore
       useEffect(() => {
         const winner = scores.findIndex(s => s >= targetScore);
         if (winner === -1) return;
@@ -1770,34 +1249,60 @@
         setShowStatsModal(true);
       }, [scores, targetScore]);
 
+
       useEffect(() => {
         if (!showRoleDraw) return;
         if (roleDrawPhase !== "REVEAL") return;
         if (!roleDrawResult) return;
+
         const names = ["VOUS", "IA 1", "IA 2"];
         const { attacker, defender, paused } = roleDrawResult;
-        setAttackerId(attacker); setDefenderId(defender); setPausedId(paused);
+
+        setAttackerId(attacker);
+        setDefenderId(defender);
+        setPausedId(paused);
+
         addLog(`✅ Rôles : ${names[attacker]} attaque, ${names[defender]} défend, ${names[paused]} en pause.`);
+
+        // petite pause “ciné” avant de lancer réellement
         const t = setTimeout(() => {
-          setShowRoleDraw(false); setGameState(GAME_STATES.PLAYING);
-          setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null);
+          setShowRoleDraw(false);
+          setGameState(GAME_STATES.PLAYING);
+
+          // IMPORTANT : reset du tour
+          setPhase(PHASES.IDLE);
+          setLastRoll(null);
+          setTargetSlot(null);
+
+          // log de démarrage orienté joueur
           if (attacker === 0) addLog(`🏀 Match commencé ! Tu attaques en premier. Victoire à ${targetScore} points.`);
           else addLog(`🏀 Match commencé ! ${names[attacker]} attaque en premier. Victoire à ${targetScore} points.`);
         }, 3000);
+
         return () => clearTimeout(t);
       }, [showRoleDraw, roleDrawPhase, roleDrawResult, targetScore]);
-
       useEffect(() => {
         if (!showRoleDraw) return;
         if (roleDrawPhase !== "SPIN") return;
-        const interval = setInterval(() => setRoleDrawTick(t => t + 1), 90);
+
+        // tick rapide pour faire défiler les noms
+        const interval = setInterval(() => {
+          setRoleDrawTick(t => t + 1);
+        }, 90);
+
+        // stop après X secondes + fixe un résultat
         const timeout = setTimeout(() => {
           clearInterval(interval);
+
           const [a, d, p] = shuffle3();
           setRoleDrawResult({ attacker: a, defender: d, paused: p });
           setRoleDrawPhase("REVEAL");
         }, 2600);
-        return () => { clearInterval(interval); clearTimeout(timeout); };
+
+        return () => {
+          clearInterval(interval);
+          clearTimeout(timeout);
+        };
       }, [showRoleDraw, roleDrawPhase]);
 
       useEffect(() => {
@@ -1830,65 +1335,36 @@
         reader.readAsText(file);
       };
 
-      const shuffle3 = () => {
-        const arr = [0, 1, 2];
-        for (let i = arr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-      };
-
-      // ---- START GAME (classic) ----
       const startNewGame = () => {
-        if (gameMode === 'draft') {
-          setAppScreen('DRAFT');
-          return;
-        }
-        initGameFromHands(null); // classic: random
-      };
-
-      // ---- INIT GAME from hands (classic ou draft) ----
-      const initGameFromHands = (draftedHands) => {
         const players = allPlayers;
-        const shuffleArr = (arr) => [...arr].sort(() => Math.random() - 0.5);
-        let newHands, remainingDecks;
+        const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+        const s = shuffle(players.filter(p => p.Poste?.trim().toUpperCase() === 'S'));
+        const m = shuffle(players.filter(p => p.Poste?.trim().toUpperCase() === 'M'));
+        const l = shuffle(players.filter(p => p.Poste?.trim().toUpperCase() === 'L'));
 
-        if (draftedHands) {
-          // Mode draft : les mains = picks du draft
-          newHands = draftedHands;
-          // Le deck est vide (toutes les cartes ont été draftées ou sont dans les mains)
-          remainingDecks = { S: [], M: [], L: [] };
-        } else {
-          // Mode classique
-          const s = shuffleArr(players.filter(p => p.Poste?.trim().toUpperCase() === 'S'));
-          const m = shuffleArr(players.filter(p => p.Poste?.trim().toUpperCase() === 'M'));
-          const l = shuffleArr(players.filter(p => p.Poste?.trim().toUpperCase() === 'L'));
-          newHands = [
-            [...s.splice(0,3), ...m.splice(0,3), ...l.splice(0,3)],
-            [...s.splice(0,3), ...m.splice(0,3), ...l.splice(0,3)],
-            [...s.splice(0,3), ...m.splice(0,3), ...l.splice(0,3)],
-          ];
-          remainingDecks = { S: s, M: m, L: l };
-        }
+        const newHands = [
+          [...s.splice(0,3), ...m.splice(0,3), ...l.splice(0,3)],
+          [...s.splice(0,3), ...m.splice(0,3), ...l.splice(0,3)],
+          [...s.splice(0,3), ...m.splice(0,3), ...l.splice(0,3)],
+        ];
 
         setHands(newHands);
-        setDecks(remainingDecks);
+        setDecks({ S: s, M: m, L: l });
         setLineups([[], [], []]);
         setScores([0, 0, 0]);
-        setAttackerId(null); setDefenderId(null); setPausedId(null);
+        setAttackerId(null);
+        setDefenderId(null);
+        setPausedId(null);
         setPhase(PHASES.IDLE);
-        setLastRoll(null); setTargetSlot(null); setShotResult(null); setPendingDraw(null);
+        setLastRoll(null);
+        setTargetSlot(null);
+        setShotResult(null);
+        setPendingDraw(null);
         setStats([{}, {}, {}]);
         setShowStatsModal(false);
         setLogs([`Placez votre 5 majeur ! (Victoire à ${targetScore} pts)`]);
         setGameState(GAME_STATES.PREGAME);
         setAppScreen('GAME');
-      };
-
-      // Draft complete callback
-      const handleDraftComplete = (draftedHands) => {
-        initGameFromHands(draftedHands);
       };
 
       // ---- GAME LOGIC ----
@@ -1928,21 +1404,34 @@
         setHands(newHands); setLineups(newLineups); setSelectedInHand(null);
         if (phase === PHASES.REPLACING_DEF || phase === PHASES.PLACING_REPLACEMENT) { setPhase(PHASES.ATK_SUB_DECISION); addLog("Remplacement effectué."); setSubDoneThisTurn(true); }
       };
+      const shuffle3 = () => {
+        const arr = [0, 1, 2];
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      };
 
       const beginRoleDraw = () => {
         setGameState(GAME_STATES.KICKOFF);
-        setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null);
-        setRoleDrawPhase("SPIN"); setRoleDrawResult(null); setRoleDrawTick(0);
+        setPhase(PHASES.IDLE);
+        setLastRoll(null);
+        setTargetSlot(null);
+
+        setRoleDrawPhase("SPIN");
+        setRoleDrawResult(null);
+        setRoleDrawTick(0);
         setShowRoleDraw(true);
+
         addLog("🎲 Tirage au sort des rôles...");
       };
-
       const validatePregame = () => {
         const count = lineups[0].length;
         if (count === 0) return setPregameError({ title: "Équipe vide !", body: "Vous n'avez placé aucun joueur sur le terrain. Cliquez sur une carte du banc pour la sélectionner, puis sur un + pour la placer." });
         if (count < 5) return setPregameError({ title: `Il manque ${5 - count} joueur${5 - count > 1 ? 's' : ''} !`, body: `Votre 5 majeur doit contenir exactement 5 joueurs. Vous en avez ${count} pour l'instant. Sélectionnez des joueurs du banc et placez-les sur le terrain.` });
         const missingPostes = POSTES.filter(pos => !lineups[0].some(p => p.Poste === pos));
-        if (missingPostes.length > 0) return setPregameError({ title: "Composition invalide !", body: `Poste(s) manquant(s) : ${missingPostes.join(', ')}.` });
+        if (missingPostes.length > 0) return setPregameError({ title: "Composition invalide !", body: `Il faut au minimum 1 joueur de chaque poste (S, M, L). Poste${missingPostes.length > 1 ? 's' : ''} manquant${missingPostes.length > 1 ? 's' : ''} : ${missingPostes.join(', ')}.` });
         const newLineups = [...lineups]; const newHands = [...hands];
         [1, 2].forEach(idx => {
           const h = [...newHands[idx]].sort((a,b) => (b.OFF + b.DEF) - (a.OFF + a.DEF));
@@ -1957,6 +1446,7 @@
         addLog("✅ Équipes validées. Préparation du match...");
         beginRoleDraw();
         [0,1,2].forEach(tid => newLineups[tid].forEach(p => ensurePlayerInStats(tid, p)));
+        addLog(`🏀 Match commencé ! Victoire à ${targetScore} points. Cible : IA 1.`);
       };
 
       const executeDuel = useCallback((slot) => {
@@ -1966,12 +1456,16 @@
         ensurePlayerInStats(attackerId, atkP); ensurePlayerInStats(defenderId, defP);
         bumpStat(attackerId, atkP, s => ({ ...s, atkDuels: s.atkDuels + 1 }));
         bumpStat(defenderId, defP, s => ({ ...s, defDuels: s.defDuels + 1 }));
+
+        // SYNERGY applied to duel stats
         const atkSynergy = computeSynergyTeams(lineups[attackerId]);
         const defSynergy = computeSynergyTeams(lineups[defenderId]);
         const atkOff = effectiveOFF(atkP, atkSynergy);
         const defDef = effectiveDEF(defP, defSynergy);
+
         const prob = Math.min(Math.max(0.5 + (atkOff - defDef) / 18, 0.05), 0.95);
         const win = Math.random() < prob;
+
         setTimeout(() => {
           setShotResult({ success: win, side: attackerId });
           setTimeout(() => {
@@ -2020,14 +1514,27 @@
             setTimeout(() => {
               let slot = roll <= 5 ? roll - 1 : 0;
               if (roll === 6) {
-                const atkL = lineups[attackerId]; const defL = lineups[defenderId];
-                let bestProb = -1; let candidates = [];
+                const atkL = lineups[attackerId];
+                const defL = lineups[defenderId];
+
+                let bestProb = -1;
+                let candidates = [];
+
                 atkL.forEach((p, i) => {
                   const pr = probScore(p, atkL, defL[i], defL);
-                  if (pr > bestProb + 1e-6) { bestProb = pr; candidates = [i]; }
-                  else if (Math.abs(pr - bestProb) < 1e-6) candidates.push(i);
+                  if (pr > bestProb + 1e-6) {
+                    bestProb = pr;
+                    candidates = [i];
+                  } else if (Math.abs(pr - bestProb) < 1e-6) {
+                    candidates.push(i);
+                  }
                 });
-                slot = candidates.sort((a, b) => ((defL[b]?.OFF??0)+(defL[b]?.DEF??0)) - ((defL[a]?.OFF??0)+(defL[a]?.DEF??0)))[0];
+
+                slot = candidates.sort((a, b) => {
+                  const A = (defL[a]?.OFF ?? 0) + (defL[a]?.DEF ?? 0);
+                  const B = (defL[b]?.OFF ?? 0) + (defL[b]?.DEF ?? 0);
+                  return B - A;
+                })[0];
               }
               executeDuel(slot);
             }, 1000);
@@ -2042,29 +1549,44 @@
               if (phase === PHASES.REPLACING_DEF) {
                 const team = activeReplacing;
                 const oppIds = [0, 1, 2].filter(x => x !== team);
-                const oppA = lineups[oppIds[0]]; const oppB = lineups[oppIds[1]];
-                let best = null; let bestU = -1e9;
+                const oppA = lineups[oppIds[0]];
+                const oppB = lineups[oppIds[1]];
+
+                let best = null;
+                let bestU = -1e9;
+
                 for (let ci = 0; ci < h.length; ci++) {
                   const card = h[ci];
                   if (l.filter(x => x.Poste === card.Poste).length >= 2) continue;
+
                   const candidates = generateInsertions(l, card);
                   for (const cand of candidates) {
                     const u = lineupUtility(cand, oppA, oppB, { off: 0.55, def: 0.45 });
-                    if (u > bestU) { bestU = u; best = { ci, lineup: cand }; }
+                    if (u > bestU) {
+                      bestU = u;
+                      best = { ci, lineup: cand };
+                    }
                   }
                 }
+
                 if (best) {
                   ensurePlayerInStats(team, h[best.ci]);
                   const newHands = h.filter((_, i) => i !== best.ci);
+
                   if (pendingDraw && pendingDraw.playerId === team) {
                     const d = decks[pendingDraw.poste];
-                    if (d.length) { newHands.push(d[0]); setDecks(v => ({ ...v, [pendingDraw.poste]: v[pendingDraw.poste].slice(1) })); }
+                    if (d.length) {
+                      newHands.push(d[0]);
+                      setDecks(v => ({ ...v, [pendingDraw.poste]: v[pendingDraw.poste].slice(1) }));
+                    }
                     setPendingDraw(null);
                   }
+
                   const nl = [...lineups]; nl[team] = best.lineup;
                   const nh = [...hands]; nh[team] = newHands;
                   setLineups(nl); setHands(nh);
                 }
+
                 setPhase(PHASES.ATK_SUB_DECISION);
               } else {
                 setPhase(PHASES.IDLE); setLastRoll(null); setTargetSlot(null);
@@ -2081,10 +1603,11 @@
         return 'border-blue-500/20 bg-blue-900/10';
       };
 
-      const currentAtkPlayer = (phase === PHASES.DUEL || phase === PHASES.ROLLING) && targetSlot !== null ? lineups[attackerId]?.[targetSlot] : null;
-      const currentDefPlayer = (phase === PHASES.DUEL || phase === PHASES.ROLLING) && targetSlot !== null ? lineups[defenderId]?.[targetSlot] : null;
-      const currentAtkSynergy = computeSynergyTeams(lineups[attackerId] || []);
-      const currentDefSynergy = computeSynergyTeams(lineups[defenderId] || []);
+      const currentAtkPlayer = (phase === PHASES.DUEL || phase === PHASES.ROLLING) && targetSlot !== null ? lineups[attackerId][targetSlot] : null;
+      const currentDefPlayer = (phase === PHASES.DUEL || phase === PHASES.ROLLING) && targetSlot !== null ? lineups[defenderId][targetSlot] : null;
+
+      const currentAtkSynergy = computeSynergyTeams(lineups[attackerId]);
+      const currentDefSynergy = computeSynergyTeams(lineups[defenderId]);
 
       // ====== SCREEN ROUTING ======
       if (appScreen === 'LOADING') {
@@ -2098,7 +1621,9 @@
               <p className="text-slate-500 text-sm mt-2">Chargement des données...</p>
             </div>
             <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 max-w-sm w-full text-center">
-              <p className="text-slate-400 text-sm mb-4">Fichier attendu : <span className="font-mono text-slate-200 text-xs">{AUTO_CSV_URL}</span></p>
+              <p className="text-slate-400 text-sm mb-4">
+                Fichier attendu : <span className="font-mono text-slate-200 text-xs">{AUTO_CSV_URL}</span>
+              </p>
               <label className="bg-orange-600 hover:bg-orange-500 text-white px-6 py-3 rounded-xl font-black cursor-pointer shadow-xl transition-all inline-block text-sm uppercase">
                 Importer CSV <input type="file" accept=".csv" onChange={handleManualUpload} className="hidden" />
               </label>
@@ -2117,8 +1642,6 @@
             setTargetScore={setTargetScore}
             showScoreModal={showScoreModal}
             setShowScoreModal={setShowScoreModal}
-            gameMode={gameMode}
-            setGameMode={setGameMode}
           />
         );
       }
@@ -2131,20 +1654,10 @@
         return <div className="min-h-screen flex flex-col bg-slate-950"><CardsScreen allPlayers={allPlayers} onBack={() => setAppScreen('HOME')} /></div>;
       }
 
-      // ====== DRAFT SCREEN ======
-      if (appScreen === 'DRAFT') {
-        return (
-          <DraftScreen
-            allPlayers={allPlayers}
-            onDraftComplete={handleDraftComplete}
-            onBack={() => setAppScreen('HOME')}
-          />
-        );
-      }
-
       // ====== GAME SCREEN ======
       return (
         <>
+        {/* Overlays (règles / cartes) depuis le jeu */}
         {overlay === 'RULES' && (
           <OverlayModal onClose={() => setOverlay(null)}>
             <RulesScreen targetScore={targetScore} onBack={() => setOverlay(null)} backLabel="Fermer" />
@@ -2158,19 +1671,30 @@
         <div className="min-h-screen p-4 md:p-6 overflow-x-hidden">
           <header className="max-w-[95%] mx-auto flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
             <div className="flex items-center gap-4">
-              <button onClick={() => setAppScreen('HOME')} className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition-all flex items-center gap-2 text-slate-400 hover:text-white text-sm font-bold">
+              <button
+                onClick={() => setAppScreen('HOME')}
+                className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-xl transition-all flex items-center gap-2 text-slate-400 hover:text-white text-sm font-bold"
+              >
                 <Icons.ArrowLeft />
               </button>
-              <div className="p-3 rounded-2xl flex items-center justify-center bg-gradient-to-br from-black via-slate-900 to-black border border-orange-500/60 shadow-[0_0_30px_rgba(249,115,22,0.45)]">
-                <BasketLogo size={28} className="object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]" />
+              <div
+                className="
+                  p-3
+                  rounded-2xl
+                  flex items-center justify-center
+                  bg-gradient-to-br from-black via-slate-900 to-black
+                  border border-orange-500/60
+                  shadow-[0_0_30px_rgba(249,115,22,0.45)]
+                "
+              >
+                <BasketLogo
+                  size={28}
+                  className="object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]"
+                />
               </div>
+
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-display text-2xl font-black italic uppercase leading-none tracking-tighter text-white">Basket Arena</h1>
-                  {gameMode === 'draft' && (
-                    <span className="px-2 py-0.5 rounded-lg bg-purple-700 text-purple-100 font-black text-[9px] uppercase tracking-widest">DRAFT</span>
-                  )}
-                </div>
+                <h1 className="font-display text-2xl font-black italic uppercase leading-none tracking-tighter text-white">Basket Arena</h1>
                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">
                   Édition Tactique 3 Joueurs · Victoire à {targetScore} pts
                 </p>
@@ -2202,7 +1726,7 @@
                     <h2 className="font-display text-4xl font-black italic uppercase mb-4 text-white">Match Terminé</h2>
                     <div className="flex flex-col md:flex-row gap-3 justify-center">
                       <button onClick={() => setShowStatsModal(true)} className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-2 rounded-lg font-black uppercase">Résultats & stats</button>
-                      <button onClick={() => initGameFromHands(null)} className="bg-white text-black px-8 py-2 rounded-lg font-bold uppercase">REJOUER</button>
+                      <button onClick={startNewGame} className="bg-white text-black px-8 py-2 rounded-lg font-bold uppercase">REJOUER</button>
                       <button onClick={() => setAppScreen('HOME')} className="bg-slate-700 text-white px-8 py-2 rounded-lg font-bold uppercase">MENU</button>
                     </div>
                   </div>
@@ -2223,12 +1747,42 @@
                         <button
                           onClick={rollDie}
                           disabled={phase !== PHASES.IDLE || attackerId !== 0}
-                          className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center transition-all duration-300 border-4 shadow-2xl ${attackerId === 0 && phase === PHASES.IDLE ? 'bg-gradient-to-br from-black via-slate-900 to-black border-orange-500/70 hover:scale-110 shadow-[0_0_30px_rgba(249,115,22,0.45)]' : 'bg-slate-900 border-slate-700 opacity-60'}`}
+                          className={`
+                            w-16 h-16 md:w-20 md:h-20
+                            rounded-full
+                            flex items-center justify-center
+                            transition-all duration-300
+                            border-4
+                            shadow-2xl
+                            ${
+                              attackerId === 0 && phase === PHASES.IDLE
+                                ? `
+                                  bg-gradient-to-br from-black via-slate-900 to-black
+                                  border-orange-500/70
+                                  hover:scale-110
+                                  shadow-[0_0_30px_rgba(249,115,22,0.45)]
+                                `
+                                : `
+                                  bg-slate-900
+                                  border-slate-700
+                                  opacity-60
+                                `
+                            }
+                          `}
                         >
                           {lastRoll ? (
-                            <span className="text-3xl md:text-4xl font-black text-white">{lastRoll}</span>
+                            <span className="text-3xl md:text-4xl font-black text-white">
+                              {lastRoll}
+                            </span>
                           ) : (
-                            <BasketLogo size={40} className={`object-contain drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)] ${phase === PHASES.ROLLING ? 'animate-roll' : ''}`} />
+                            <BasketLogo
+                              size={40}
+                              className={`
+                                object-contain
+                                drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]
+                                ${phase === PHASES.ROLLING ? 'animate-roll' : ''}
+                              `}
+                            />
                           )}
                         </button>
                         {shotResult && (
@@ -2256,28 +1810,52 @@
               </div>
 
               <div data-team-id={0} className={`p-4 md:p-6 rounded-[2.5rem] border team-zone-transition relative shadow-lg ${getUserBoardStyle()}`}>
-                <div className={`absolute -top-3 left-8 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg ${attackerId === null ? 'bg-slate-600' : attackerId === 0 ? 'bg-yellow-600' : defenderId === 0 ? 'bg-slate-500' : 'bg-blue-600'}`}>
-                  {attackerId === null ? "🧩 COMPOSITION D'ÉQUIPE" : attackerId === 0 ? "🔥 VOUS ATTAQUEZ" : defenderId === 0 ? "🛡️ VOUS DÉFENDEZ" : "⏸️ VOUS (EN PAUSE)"}
+                <div
+                  className={`absolute -top-3 left-8 text-white text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg
+                    ${
+                      attackerId === null
+                        ? 'bg-slate-600'
+                        : attackerId === 0
+                        ? 'bg-yellow-600'
+                        : defenderId === 0
+                        ? 'bg-slate-500'
+                        : 'bg-blue-600'
+                    }`}
+                >
+                  {attackerId === null
+                    ? "🧩 COMPOSITION D'ÉQUIPE"
+                    : attackerId === 0
+                    ? "🔥 VOUS ATTAQUEZ"
+                    : defenderId === 0
+                    ? "🛡️ VOUS DÉFENDEZ"
+                    : "⏸️ VOUS (EN PAUSE)"}
                 </div>
+
                 <div className="flex justify-center items-center gap-1.5 md:gap-2 min-h-[140px] md:min-h-[220px] w-full px-2 py-2">
                   {(() => {
                     const showZones = gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0);
                     const canInsertAt = (insertIdx) => {
-                      if (!showZones || selectedInHand === null) return false;
+                      if (!showZones) return false;
+                      if (selectedInHand === null) return false; // pas de carte sélectionnée : aucun +
                       const card = hands[0][selectedInHand];
                       const orderMap = { 'S': 1, 'M': 2, 'L': 3 };
-                      const test = [...lineups[0]]; test.splice(insertIdx, 0, card);
-                      for (let k = 0; k < test.length - 1; k++) { if (orderMap[test[k].Poste] > orderMap[test[k+1].Poste]) return false; }
+                      const test = [...lineups[0]];
+                      test.splice(insertIdx, 0, card);
+                      for (let k = 0; k < test.length - 1; k++) {
+                        if (orderMap[test[k].Poste] > orderMap[test[k+1].Poste]) return false;
+                      }
                       return true;
                     };
                     return canInsertAt(0) ? <DropZone onClick={() => handleInsertion(0)} /> : null;
                   })()}
+
                   {(() => {
                     const userSynergy = computeSynergyTeams(lineups[0]);
                     return lineups[0].map((p, i) => (
                       <React.Fragment key={i}>
                         <PlayerCard
-                          player={p} synergyTeams={userSynergy}
+                          player={p}
+                          synergyTeams={userSynergy}
                           isTarget={defenderId === 0 && targetSlot === i}
                           isAttacker={attackerId === 0 && targetSlot === i && (phase === PHASES.ROLLING || phase === PHASES.DUEL)}
                           isJumping={phase === PHASES.DUEL && targetSlot === i && (attackerId === 0 || defenderId === 0)}
@@ -2287,11 +1865,15 @@
                         {(() => {
                           const showZones = gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0);
                           const canInsertAt = (insertIdx) => {
-                            if (!showZones || selectedInHand === null) return false;
+                            if (!showZones) return false;
+                            if (selectedInHand === null) return false;
                             const card = hands[0][selectedInHand];
                             const orderMap = { 'S': 1, 'M': 2, 'L': 3 };
-                            const test = [...lineups[0]]; test.splice(insertIdx, 0, card);
-                            for (let k = 0; k < test.length - 1; k++) { if (orderMap[test[k].Poste] > orderMap[test[k+1].Poste]) return false; }
+                            const test = [...lineups[0]];
+                            test.splice(insertIdx, 0, card);
+                            for (let k = 0; k < test.length - 1; k++) {
+                              if (orderMap[test[k].Poste] > orderMap[test[k+1].Poste]) return false;
+                            }
                             return true;
                           };
                           return canInsertAt(i + 1) ? <DropZone onClick={() => handleInsertion(i + 1)} /> : null;
@@ -2307,27 +1889,40 @@
                 <div className="flex gap-2 md:gap-4 overflow-x-auto pb-2 scrollbar-hide px-2">
                   {(() => {
                     const currentLineup = lineups[0];
-                    const isSelectingMode = gameState === GAME_STATES.PREGAME || phase === PHASES.PLACING_REPLACEMENT || (phase === PHASES.REPLACING_DEF && pausedId === 0);
+                    const isSelectingMode = gameState === GAME_STATES.PREGAME
+                      || phase === PHASES.PLACING_REPLACEMENT
+                      || (phase === PHASES.REPLACING_DEF && pausedId === 0);
+
                     const isBenchCardPlayable = (card) => {
-                      if (!isSelectingMode) return true;
+                      if (!isSelectingMode) return true; // pas en mode sélection = pas grisé
                       if (currentLineup.length >= 5) return false;
                       const posOnField = currentLineup.filter(p => p.Poste === card.Poste).length;
                       if (posOnField >= 2) return false;
+
                       const afterLineup = [...currentLineup, card];
                       const slotsLeft = 5 - afterLineup.length;
                       const remainingBench = hands[0].filter((_, bi) => hands[0][bi] !== card);
+
                       const missingPostes = POSTES.filter(pos => {
                         const onField = afterLineup.filter(p => p.Poste === pos).length;
                         if (onField > 0) return false;
-                        return remainingBench.filter(p => p.Poste === pos).length === 0;
+                        const availInBench = remainingBench.filter(p => p.Poste === pos).length;
+                        return availInBench === 0;
                       });
                       if (missingPostes.length > 0) return false;
+
                       const uncoveredPostes = POSTES.filter(pos => afterLineup.filter(p => p.Poste === pos).length === 0);
                       if (uncoveredPostes.length > slotsLeft) return false;
+
                       return true;
                     };
+
                     return hands[0].map((p, i) => (
-                      <PlayerCard key={i} player={p} size="sm" selected={selectedInHand === i}
+                      <PlayerCard
+                        key={i}
+                        player={p}
+                        size="sm"
+                        selected={selectedInHand === i}
                         grayed={isSelectingMode && !isBenchCardPlayable(p)}
                         onClick={() => {
                           if (!isBenchCardPlayable(p)) return;
@@ -2350,6 +1945,7 @@
                   ))}
                 </div>
               </div>
+
               <div className="bg-slate-900/50 rounded-3xl p-5 border border-slate-800 flex flex-col gap-3">
                 <h4 className="font-display font-black text-slate-300 italic uppercase text-lg">Navigation</h4>
                 <button onClick={() => setOverlay('RULES')} className="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-200 font-bold text-sm flex items-center justify-center gap-2 transition-all">
@@ -2365,19 +1961,35 @@
             </aside>
           </main>
 
-          <RoleDrawModal open={showRoleDraw} tick={roleDrawTick} phase={roleDrawPhase} result={roleDrawResult}
-            onSkip={() => { const [a, d, p] = shuffle3(); setRoleDrawResult({ attacker: a, defender: d, paused: p }); setRoleDrawPhase("REVEAL"); }} />
-          <StatsModal open={showStatsModal} onClose={() => setShowStatsModal(false)} stats={stats} scores={scores}
-            onReplay={() => initGameFromHands(null)} onMenu={() => { setAppScreen('HOME'); setShowStatsModal(false); }} />
+          <RoleDrawModal
+            open={showRoleDraw}
+            tick={roleDrawTick}
+            phase={roleDrawPhase}
+            result={roleDrawResult}
+            onSkip={() => {
+              // skip direct : fixe un résultat instant
+              const [a, d, p] = shuffle3();
+              setRoleDrawResult({ attacker: a, defender: d, paused: p });
+              setRoleDrawPhase("REVEAL");
+            }}
+          />
+          <StatsModal open={showStatsModal} onClose={() => setShowStatsModal(false)} stats={stats} scores={scores} onReplay={startNewGame} onMenu={() => { setAppScreen('HOME'); setShowStatsModal(false); }} />
 
           {pregameError && (
             <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
               <div onClick={() => setPregameError(null)} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
               <div className="relative bg-slate-900 border border-red-500/40 rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
-                <div className="w-14 h-14 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4"><span className="text-3xl">⚠️</span></div>
+                <div className="w-14 h-14 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">⚠️</span>
+                </div>
                 <h3 className="font-display font-black text-2xl italic uppercase text-white mb-3">{pregameError.title}</h3>
                 <p className="text-slate-400 text-sm leading-relaxed mb-6">{pregameError.body}</p>
-                <button onClick={() => setPregameError(null)} className="w-full py-3 bg-orange-600 hover:bg-orange-500 rounded-xl font-black uppercase text-white transition-all">OK</button>
+                <button
+                  onClick={() => setPregameError(null)}
+                  className="w-full py-3 bg-orange-600 hover:bg-orange-500 rounded-xl font-black uppercase text-white transition-all"
+                >
+                  OK, je complète mon équipe
+                </button>
               </div>
             </div>
           )}
@@ -2402,7 +2014,9 @@
       const ring = isAttacking ? 'ring-4 ring-yellow-500 border-yellow-500/50 bg-gradient-to-br from-yellow-900/40 via-yellow-900/20 to-black glow-gold'
         : isDefending ? 'ring-4 ring-slate-400 border-slate-400/50 bg-gradient-to-br from-slate-700/40 via-slate-800/20 to-black glow-silver'
         : 'border-slate-800 bg-slate-900/20';
+
       const synergyTeams = computeSynergyTeams(lineup);
+
       return (
         <div data-team-id={teamId} className={`p-3 md:p-4 rounded-3xl border team-zone-transition relative shadow-lg ${ring} w-full min-w-0`}>
           <div className={`absolute -top-2.5 left-6 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg uppercase whitespace-nowrap ${isAttacking ? 'bg-yellow-600' : isDefending ? 'bg-slate-500' : 'bg-slate-800'}`}>
@@ -2410,10 +2024,17 @@
           </div>
           <div className="flex justify-center items-center gap-1 md:gap-2 min-h-[120px] md:min-h-[220px] w-full py-2">
             {lineup.map((p, i) => (
-              <PlayerCard key={i} player={p} size="sm" synergyTeams={synergyTeams}
-                isTarget={isDefending && targetSlot === i} isAttacker={isAttacking && targetSlot === i}
+              <PlayerCard
+                key={i}
+                player={p}
+                size="sm"
+                synergyTeams={synergyTeams}
+                isTarget={isDefending && targetSlot === i}
+                isAttacker={isAttacking && targetSlot === i}
                 isJumping={isDuelActive && targetSlot === i && (isAttacking || isDefending)}
-                canBeTargeted={isDefending && !targetSlot} onClick={() => onSlotClick(i)} />
+                canBeTargeted={isDefending && !targetSlot}
+                onClick={() => onSlotClick(i)}
+              />
             ))}
           </div>
         </div>
@@ -2425,7 +2046,9 @@
       if (phase === PHASES.ATK_SUB_DECISION && attackerId === 0) {
         return (
           <div className="flex gap-4">
-            {!subDoneThisTurn && <button onClick={onSub} className="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-blue-500 transition-all shadow-lg">🔄 Remplacer</button>}
+            {!subDoneThisTurn && (
+              <button onClick={onSub} className="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-blue-500 transition-all shadow-lg">🔄 Remplacer</button>
+            )}
             <button onClick={onSkip} className="bg-slate-800 px-6 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-slate-700 transition-all">🏀 Continuer</button>
           </div>
         );
@@ -2448,6 +2071,7 @@
       const [tab, setTab] = useState(0);
       useEffect(() => { if (!open) return; setStep("SUMMARY"); setTab(0); }, [open]);
       if (!open) return null;
+
       const names = ["VOUS", "IA 1", "IA 2"];
       const safeScores = Array.isArray(scores) ? scores : [0,0,0];
       const rows = (teamId) => Object.values(stats?.[teamId] || {}).sort((a,b) => ((b.atkWins*2 + b.defStops) - (a.atkWins*2 + a.defStops)));
@@ -2458,20 +2082,25 @@
       const winnerId = (() => { const idxs = safeScores.map((s,i)=>({s,i})).filter(x=>x.s===max).map(x=>x.i); return idxs.length !== 1 ? -1 : idxs[0]; })();
       const winnerLabel = winnerId === -1 ? "ÉGALITÉ !" : `🏆 Vainqueur : ${names[winnerId]}`;
       const teamBadge = (tid) => tid === winnerId ? 'bg-yellow-500 text-black' : 'bg-slate-700 text-slate-100';
+
       return (
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-2 md:p-4">
           <div onClick={onClose} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
           <div className="relative w-full max-w-4xl rounded-3xl border border-slate-700 bg-slate-950 shadow-2xl flex flex-col" style={{maxHeight: '95dvh'}}>
+            {/* Header fixe */}
             <div className="flex-shrink-0 flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-slate-800">
               <div>
                 <h3 className="font-display text-lg md:text-xl font-black italic uppercase text-white">{step === "SUMMARY" ? "Résultats du match" : "Stats du match"}</h3>
+                <p className="text-[10px] md:text-[11px] text-slate-400 font-bold">{step === "SUMMARY" ? "Score final & stats d'équipe" : "Joueurs utilisés • Offense & Défense"}</p>
               </div>
               <div className="flex gap-2">
                 {step === "DETAILS" && <button onClick={() => setStep("SUMMARY")} className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs uppercase">← Résultats</button>}
                 <button onClick={onClose} className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs uppercase">Fermer</button>
               </div>
             </div>
+            {/* Contenu scrollable */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
+
             {step === "SUMMARY" ? (
               <div className="p-6">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -2490,11 +2119,14 @@
                         <div className={`px-3 py-1 rounded-xl font-black text-[11px] ${teamBadge(tid)}`}>{winnerId === -1 ? "—" : (tid === winnerId ? "WIN" : "LOSE")}</div>
                       </div>
                       <div className="text-5xl font-black text-white">{safeScores[tid] ?? 0}</div>
+                      <div className="mt-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Score final</div>
                     </div>
                   ))}
                 </div>
                 <div className="rounded-3xl border border-slate-800 bg-slate-900/30 overflow-hidden">
-                  <div className="px-5 py-4 border-b border-slate-800"><div className="text-[11px] font-black uppercase tracking-widest text-slate-400">Stats d'équipe</div></div>
+                  <div className="px-5 py-4 border-b border-slate-800">
+                    <div className="text-[11px] font-black uppercase tracking-widest text-slate-400">Stats d'équipe</div>
+                  </div>
                   <div className="grid grid-cols-12 gap-0 px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800">
                     <div className="col-span-3">Équipe</div><div className="col-span-3 text-center">Joueurs</div>
                     <div className="col-span-3 text-center">OFF</div><div className="col-span-3 text-center">DEF</div>
@@ -2524,27 +2156,40 @@
                     ))}
                   </div>
                 </div>
-                <div className="p-6">
+                <div className="p-6 scrollbar-hide">
                   <div className="rounded-2xl border border-slate-800 bg-slate-900/30 overflow-hidden">
                     <div className="grid grid-cols-12 gap-0 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-slate-800">
                       <div className="col-span-4">Joueur</div><div className="col-span-2 text-center">Poste</div>
                       <div className="col-span-3 text-center">OFF</div><div className="col-span-3 text-center">DEF</div>
                     </div>
-                    {rows(tab).length === 0 ? <div className="p-6 text-slate-400 text-sm">Aucune stat.</div> :
-                      rows(tab).map(r => (
+                    {(() => {
+                      const t = totals(tab);
+                      return (
+                        <div className="grid grid-cols-12 px-4 py-3 text-[11px] border-b border-slate-800 bg-slate-950/40">
+                          <div className="col-span-4"><div className="font-black text-slate-100 uppercase">Total équipe</div><div className="text-[10px] text-slate-500 font-bold">{t.players} joueur(s)</div></div>
+                          <div className="col-span-2 flex items-center justify-center"><span className="px-2 py-1 rounded-lg bg-slate-700 text-slate-100 font-black text-[10px]">—</span></div>
+                          <div className="col-span-3 flex items-center justify-center gap-2"><span className="font-black text-orange-300">{t.atkWins}/{t.atkDuels}</span><span className="text-slate-500 font-bold">({pct(t.atkWins, t.atkDuels)}%)</span></div>
+                          <div className="col-span-3 flex items-center justify-center gap-2"><span className="font-black text-slate-200">{t.defStops}/{t.defDuels}</span><span className="text-slate-500 font-bold">({pct(t.defStops, t.defDuels)}%)</span></div>
+                        </div>
+                      );
+                    })()}
+                    <div className="overflow-y-auto scrollbar-hide">
+                      {rows(tab).length === 0 ? (
+                        <div className="p-6 text-slate-400 text-sm">Aucune stat.</div>
+                      ) : rows(tab).map(r => (
                         <div key={r.id} className="grid grid-cols-12 px-4 py-3 text-[11px] border-b border-slate-800/60 hover:bg-slate-800/20">
-                          <div className="col-span-4"><div className="font-black text-slate-100 truncate">{(r.name||"???").split(',')[0]}</div><div className="text-[10px] text-slate-500 font-bold">OFF {r.off} · DEF {r.def}</div></div>
+                          <div className="col-span-4"><div className="font-black text-slate-100 truncate">{(r.name||"???").split(',')[0]}</div><div className="text-[10px] text-slate-500 font-bold">OFF {r.off} • DEF {r.def}</div></div>
                           <div className="col-span-2 flex items-center justify-center"><span className="px-2 py-1 rounded-lg bg-yellow-500 text-black font-black text-[10px]">{r.poste}</span></div>
                           <div className="col-span-3 flex items-center justify-center gap-2"><span className="font-black text-orange-300">{r.atkWins}/{r.atkDuels}</span><span className="text-slate-500 font-bold">({pct(r.atkWins, r.atkDuels)}%)</span></div>
                           <div className="col-span-3 flex items-center justify-center gap-2"><span className="font-black text-slate-200">{r.defStops}/{r.defDuels}</span><span className="text-slate-500 font-bold">({pct(r.defStops, r.defDuels)}%)</span></div>
                         </div>
-                      ))
-                    }
+                      ))}
+                    </div>
                   </div>
                 </div>
               </>
             )}
-            </div>
+            </div>{/* fin scrollable */}
           </div>
         </div>
       );
